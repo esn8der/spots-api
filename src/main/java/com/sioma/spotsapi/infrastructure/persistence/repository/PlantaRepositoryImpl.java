@@ -23,4 +23,9 @@ public class PlantaRepositoryImpl implements PlantaRepository {
 
         return new Planta(entity.getId(), entity.getNombre());
     }
+
+    @Override
+    public boolean existsByNombreIgnoreCase(String nombre) {
+        return jpaRepository.existsByNombreIgnoreCase(nombre);
+    }
 }

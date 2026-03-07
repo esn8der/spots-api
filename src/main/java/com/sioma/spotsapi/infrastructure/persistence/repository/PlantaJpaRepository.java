@@ -4,4 +4,5 @@ import com.sioma.spotsapi.infrastructure.persistence.entity.PlantaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PlantaJpaRepository extends JpaRepository<PlantaEntity, Long> {
+    boolean existsByNombreIgnoreCase(String nombre);
 }
