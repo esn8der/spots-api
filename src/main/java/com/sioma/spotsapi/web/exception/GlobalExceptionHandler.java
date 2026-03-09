@@ -1,23 +1,39 @@
 package com.sioma.spotsapi.web.exception;
 
+import com.sioma.spotsapi.domain.exception.PlantaAlreadyExistsException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleRuntime(RuntimeException ex){
+    @ExceptionHandler(PlantaAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handlePlantaExists(
+            PlantaAlreadyExistsException ex) {
 
-        Map<String,String> error = new HashMap<>();
+        HttpStatus status = HttpStatus.CONFLICT;
 
-        error.put("error","BUSINESS_ERROR");
-        error.put("message",ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "PLANTA_ALREADY_EXISTS"
+                );
 
-        return ResponseEntity.badRequest().body(error);
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex){
+
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                "INTERNAL_ERROR",
+                "Error interno del servidor"
+        );
+
+        return ResponseEntity.status(status).body(error);
     }
 }
