@@ -1,6 +1,7 @@
 package com.sioma.spotsapi.web.exception;
 
 import com.sioma.spotsapi.domain.exception.PlantaAlreadyExistsException;
+import com.sioma.spotsapi.domain.exception.UsuarioAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,18 @@ public class GlobalExceptionHandler {
                 "PLANTA_ALREADY_EXISTS"
                 );
 
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(UsuarioAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsuarioExists( UsuarioAlreadyExistsException ex) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "USUARIO_ALREADY_EXISTS"
+                );
         return ResponseEntity.status(status).body(error);
     }
 

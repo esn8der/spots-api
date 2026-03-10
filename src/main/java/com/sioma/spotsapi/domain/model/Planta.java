@@ -3,7 +3,7 @@ package com.sioma.spotsapi.domain.model;
 public class Planta {
 
     private Long id;
-    private String nombre;
+    private final String nombre;
 
     public Planta(Long id, String nombre) {
         this.id = id;
