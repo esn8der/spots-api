@@ -1,6 +1,7 @@
 package com.sioma.spotsapi.application.usecase;
 
 import com.sioma.spotsapi.domain.exception.UsuarioAlreadyExistsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
@@ -8,9 +9,11 @@ import com.sioma.spotsapi.domain.repository.UsuarioRepository;
 @Service
 public class CreateUsuarioUseCase {
     private final UsuarioRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CreateUsuarioUseCase(UsuarioRepository repository) {
+    public CreateUsuarioUseCase(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Usuario execute(String nombre, String email, String password) {
@@ -19,7 +22,9 @@ public class CreateUsuarioUseCase {
             throw new UsuarioAlreadyExistsException();
         }
 
-        Usuario usuario = new Usuario(nombre, email, password);
+        String passwordHash = passwordEncoder.encode(password);
+
+        Usuario usuario = new Usuario(nombre, email, passwordHash);
 
         return repository.save(usuario);
     }
