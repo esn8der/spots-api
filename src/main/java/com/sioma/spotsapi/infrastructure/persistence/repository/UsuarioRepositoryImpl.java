@@ -27,4 +27,9 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     public boolean existsByEmailIgnoreCase(String email) {
         return jpaRepository.existsByEmailIgnoreCase(email);
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        return jpaRepository.existsById(id);
+    }
 }

@@ -6,5 +6,5 @@ public interface UsuarioRepository {
 
     Usuario save(Usuario usuario);
     boolean existsByEmailIgnoreCase(String email);
-
+    boolean existsById(Long id);
 }

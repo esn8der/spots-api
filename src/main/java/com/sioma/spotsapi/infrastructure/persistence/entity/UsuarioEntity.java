@@ -9,7 +9,6 @@ import lombok.Getter;
 public class UsuarioEntity {
 
     @Id
-    @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

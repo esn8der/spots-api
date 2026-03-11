@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Table(name = "planta")
-public class PlantaEntity {
+@Table(name = "finca")
+public class FincaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,9 +14,13 @@ public class PlantaEntity {
 
     private String nombre;
 
-    public PlantaEntity() {}
+    @Column(name = "usuario_id")
+    private Long idUsuario;
 
-    public PlantaEntity(String nombre) {
+    public FincaEntity() {}
+
+    public FincaEntity(String nombre, Long idUsuario) {
         this.nombre = nombre;
+        this.idUsuario = idUsuario;
     }
 }
