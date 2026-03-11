@@ -17,15 +17,15 @@ public class CreateFincaUseCase {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Finca execute(String nombre, Long idUsuario) {
+    public Finca execute(String nombre, Long usuarioId) {
 
-        if (!usuarioRepository.existsById(idUsuario)) {
-            throw new UsuarioNotExistsException(idUsuario);
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new UsuarioNotExistsException(usuarioId);
         }
-        if (fincaRepository.existsByNombreIgnoreCaseAndIdUsuario(nombre, idUsuario)) {
+        if (fincaRepository.existsByNombreIgnoreCaseAndUsuarioId(nombre, usuarioId)) {
             throw new FincaAlreadyExistsException();
         }
 
-        return fincaRepository.save(new Finca(nombre, idUsuario));
+        return fincaRepository.save(new Finca(nombre, usuarioId));
     }
 }

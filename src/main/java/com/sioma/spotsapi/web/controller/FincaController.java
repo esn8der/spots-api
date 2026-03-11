@@ -19,6 +19,6 @@ public class FincaController {
 
     @PostMapping
     public Finca create(@RequestBody CreateFincaRequest request) {
-        return useCase.execute(request.nombre(), request.idUsuario());
+        return useCase.execute(request.nombre(), request.usuarioId());
     }
 }

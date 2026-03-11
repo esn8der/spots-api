@@ -4,5 +4,5 @@ import com.sioma.spotsapi.domain.model.Finca;
 
 public interface FincaRepository {
     Finca save(Finca finca);
-    boolean existsByNombreIgnoreCaseAndIdUsuario(String nombre, Long idUsuario);
+    boolean existsByNombreIgnoreCaseAndUsuarioId(String nombre, Long usuarioId);
 }

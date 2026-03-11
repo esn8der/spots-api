@@ -15,12 +15,12 @@ public class FincaEntity {
     private String nombre;
 
     @Column(name = "usuario_id")
-    private Long idUsuario;
+    private Long usuarioId;
 
     public FincaEntity() {}
 
-    public FincaEntity(String nombre, Long idUsuario) {
+    public FincaEntity(String nombre, Long usuarioId) {
         this.nombre = nombre;
-        this.idUsuario = idUsuario;
+        this.usuarioId = usuarioId;
     }
 }

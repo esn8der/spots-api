@@ -3,17 +3,17 @@ package com.sioma.spotsapi.domain.model;
 public class Finca {
     private Long id;
     private final String nombre;
-    private Long idUsuario;
+    private final Long usuarioId;
 
-    public Finca(Long id, String nombre, Long idUsuario) {
+    public Finca(Long id, String nombre, Long usuarioId) {
         this.id = id;
         this.nombre = nombre;
-        this.idUsuario = idUsuario;
+        this.usuarioId = usuarioId;
     }
 
-    public Finca(String nombre, Long idUsuario) {
+    public Finca(String nombre, Long usuarioId) {
         this.nombre = nombre;
-        this.idUsuario = idUsuario;
+        this.usuarioId = usuarioId;
     }
 
     public Long getId() {
@@ -24,7 +24,7 @@ public class Finca {
         return nombre;
     }
 
-    public Long getIdUsuario() {
-        return idUsuario;
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 }
