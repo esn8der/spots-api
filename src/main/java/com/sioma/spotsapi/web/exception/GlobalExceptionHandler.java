@@ -1,9 +1,6 @@
 package com.sioma.spotsapi.web.exception;
 
-import com.sioma.spotsapi.domain.exception.FincaAlreadyExistsException;
-import com.sioma.spotsapi.domain.exception.PlantaAlreadyExistsException;
-import com.sioma.spotsapi.domain.exception.UsuarioAlreadyExistsException;
-import com.sioma.spotsapi.domain.exception.UsuarioNotExistsException;
+import com.sioma.spotsapi.domain.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +56,42 @@ public class GlobalExceptionHandler {
                 status.value(),
                 ex.getMessage(),
                 "USUARIO_NOT_EXISTS"
+                );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(FincaNotExistsException.class)
+    public ResponseEntity<ErrorResponse> handleFincaNotExists(FincaNotExistsException ex) {
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "FINCA_NOT_EXISTS"
+                );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(PlantaNotExistsException.class)
+    public ResponseEntity<ErrorResponse> handlePlantaNotExists(PlantaNotExistsException ex) {
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "PLANTA_NOT_EXISTS"
+                );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(LoteAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleLoteExists(LoteAlreadyExistsException ex) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "LOTE_ALREADY_EXISTS"
                 );
         return ResponseEntity.status(status).body(error);
     }
