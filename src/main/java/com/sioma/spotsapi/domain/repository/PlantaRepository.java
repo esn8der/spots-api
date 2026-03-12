@@ -6,5 +6,6 @@ public interface PlantaRepository {
 
     Planta save(Planta planta);
     boolean existsByNombreIgnoreCase(String nombre);
+    boolean existsById(Long id);
 
 }

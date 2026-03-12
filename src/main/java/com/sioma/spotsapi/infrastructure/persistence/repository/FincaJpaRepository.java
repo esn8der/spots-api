@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FincaJpaRepository extends JpaRepository<FincaEntity, Long> {
     boolean existsByNombreIgnoreCaseAndUsuarioId(String nombre, Long usuarioId);
+    boolean existsById(Long id);
 }

@@ -28,4 +28,9 @@ public class FincaRepositoryImpl implements FincaRepository {
     public boolean existsByNombreIgnoreCaseAndUsuarioId(String nombre, Long usuarioId) {
         return jpaRepository.existsByNombreIgnoreCaseAndUsuarioId(nombre, usuarioId);
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        return jpaRepository.existsById(id);
+    }
 }
