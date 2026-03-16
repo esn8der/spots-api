@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.application.fixtures.PlantaFixtures;
+import com.sioma.spotsapi.fixtures.PlantaFixtures;
 import com.sioma.spotsapi.domain.exception.PlantaAlreadyExistsException;
 import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
@@ -11,12 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @ExtendWith(MockitoExtension.class)
-public class CreatePlantaUseCaseTest {
+class CreatePlantaUseCaseTest {
 
     @Mock
     PlantaRepository repository;
