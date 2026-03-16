@@ -1,4 +1,4 @@
-package com.sioma.spotsapi.application.fixtures;
+package com.sioma.spotsapi.fixtures;
 
 public class UsuarioFixtures {
 

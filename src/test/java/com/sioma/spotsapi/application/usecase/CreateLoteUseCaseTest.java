@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.application.fixtures.LoteFixtures;
+import com.sioma.spotsapi.fixtures.LoteFixtures;
 import com.sioma.spotsapi.domain.exception.FincaNotExistsException;
 import com.sioma.spotsapi.domain.exception.LoteAlreadyExistsException;
 import com.sioma.spotsapi.domain.exception.PlantaNotExistsException;
@@ -15,12 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @ExtendWith(MockitoExtension.class)
-public class CreateLoteUseCaseTest {
+class CreateLoteUseCaseTest {
 
     @Mock
     LoteRepository repository;

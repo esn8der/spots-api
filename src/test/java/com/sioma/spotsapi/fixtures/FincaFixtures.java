@@ -1,4 +1,4 @@
-package com.sioma.spotsapi.application.fixtures;
+package com.sioma.spotsapi.fixtures;
 
 public class FincaFixtures {
     public static final String NOMBRE = "Finca 1";
