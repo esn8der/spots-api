@@ -5,6 +5,8 @@ import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entity.FincaEntity;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class FincaRepositoryImpl implements FincaRepository {
 
@@ -32,5 +34,22 @@ public class FincaRepositoryImpl implements FincaRepository {
     @Override
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
+    }
+
+    @Override
+    public List<Finca> findAllByUsuarioId(Long usuarioId) {
+        return jpaRepository.findAllByUsuarioId(usuarioId)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    // mapper simple (luego usar MapStruct)
+    private Finca toDomain(FincaEntity entity) {
+        return new Finca(
+                entity.getId(),
+                entity.getNombre(),
+                entity.getUsuarioId()
+        );
     }
 }

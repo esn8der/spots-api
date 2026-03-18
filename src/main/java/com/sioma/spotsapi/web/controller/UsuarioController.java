@@ -1,21 +1,24 @@
 package com.sioma.spotsapi.web.controller;
 
+import org.springframework.web.bind.annotation.*;
 import com.sioma.spotsapi.application.usecase.CreateUsuarioUseCase;
+import com.sioma.spotsapi.application.usecase.GetFincasByUsuarioIdUseCase;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.web.dto.CreateUsuarioRequest;
+import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.UsuarioResponse;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
     private final CreateUsuarioUseCase useCase;
+    private final GetFincasByUsuarioIdUseCase getFincasByUsuarioIdUseCase;
 
-    public UsuarioController(CreateUsuarioUseCase useCase) {
+    public UsuarioController(CreateUsuarioUseCase useCase, GetFincasByUsuarioIdUseCase getFincasByUsuarioIdUseCase) {
         this.useCase = useCase;
+        this.getFincasByUsuarioIdUseCase = getFincasByUsuarioIdUseCase;
     }
 
     @PostMapping
@@ -31,5 +34,14 @@ public class UsuarioController {
                 usuario.getNombre(),
                 usuario.getEmail()
         );
+    }
+
+    @GetMapping("/{id}/fincas")
+    public List<FincaResponse> getFincasByUsuario(@PathVariable Long id) {
+
+        return getFincasByUsuarioIdUseCase.execute(id)
+                .stream()
+                .map(f -> new FincaResponse(f.getId(), f.getNombre()))
+                .toList();
     }
 }

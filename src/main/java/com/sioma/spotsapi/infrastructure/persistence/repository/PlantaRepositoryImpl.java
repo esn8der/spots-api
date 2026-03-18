@@ -4,6 +4,7 @@ import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entity.PlantaEntity;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 @Repository
 public class PlantaRepositoryImpl implements PlantaRepository {
@@ -32,5 +33,16 @@ public class PlantaRepositoryImpl implements PlantaRepository {
     @Override
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
+    }
+
+    @Override
+    public List<Planta> findAll() {
+        return jpaRepository.findAll()
+                .stream()
+                .map(entity -> new Planta(
+                        entity.getId(),
+                        entity.getNombre()
+                ))
+                .toList();
     }
 }
