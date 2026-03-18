@@ -21,4 +21,16 @@ public class Planta {
     public String getNombre() {
         return nombre;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Planta planta)) return false;
+        return id != null && id.equals(planta.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -27,4 +27,16 @@ public class Finca {
     public Long getUsuarioId() {
         return usuarioId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Finca finca)) return false;
+        return id != null && id.equals(finca.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -42,4 +42,16 @@ public class Lote {
     public boolean isOnAgp() {
         return onAgp;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Lote lote)) return false;
+        return id != null && id.equals(lote.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
