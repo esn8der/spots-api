@@ -36,7 +36,7 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
     @DisplayName("Should return true when lote already exists by fincaId and nombre ignore case")
     void shouldReturnTrueWhenLoteAlreadyExists(){
         // GIVEN
-        usuarioRepository.save(
+       UsuarioEntity usuario = usuarioRepository.save(
                 new UsuarioEntity(
                         UsuarioFixtures.NOMBRE,
                         UsuarioFixtures.EMAIL,
@@ -44,14 +44,14 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
                 )
         );
 
-        fincaRepository.save(
+       FincaEntity finca = fincaRepository.save(
                 new FincaEntity(
                         FincaFixtures.NOMBRE,
-                        FincaFixtures.USUARIO_ID
+                        usuario.getId()
                 )
         );
 
-        plantaRepository.save(
+       PlantaEntity planta = plantaRepository.save(
                 new PlantaEntity(
                         PlantaFixtures.NOMBRE
                 )
@@ -60,8 +60,8 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
         repository.save(
                 new LoteEntity(
                         LoteFixtures.NOMBRE,
-                        LoteFixtures.FINCA_ID,
-                        LoteFixtures.TIPO_CULTIVO_ID
+                        finca.getId(),
+                        planta.getId()
                 )
         );
 

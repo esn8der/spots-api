@@ -26,7 +26,7 @@ class FincaJpaRepositoryTest extends PostgresContainerConfig {
     @DisplayName("Should return true when finca already exists by usuarioId and nombre ignore case")
     void shouldReturnTrueWhenFincaAlreadyExists(){
         // GIVEN
-        usuarioRepository.save(
+        UsuarioEntity usuario = usuarioRepository.save(
                 new UsuarioEntity(
                         UsuarioFixtures.NOMBRE,
                         UsuarioFixtures.EMAIL,
@@ -37,7 +37,7 @@ class FincaJpaRepositoryTest extends PostgresContainerConfig {
         repository.save(
                 new FincaEntity(
                         FincaFixtures.NOMBRE,
-                        FincaFixtures.USUARIO_ID
+                        usuario.getId()
                 )
         );
 
