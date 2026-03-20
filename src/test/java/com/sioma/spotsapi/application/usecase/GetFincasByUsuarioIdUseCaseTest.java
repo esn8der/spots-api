@@ -77,5 +77,4 @@ class GetFincasByUsuarioIdUseCaseTest {
         verify(repository).findAllByUsuarioId(FincaFixtures.USUARIO_ID);
         assertEquals(expectedFincas, result);
     }
-
 }

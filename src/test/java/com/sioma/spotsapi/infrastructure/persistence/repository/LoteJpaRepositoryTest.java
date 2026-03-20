@@ -9,13 +9,15 @@ import com.sioma.spotsapi.infrastructure.persistence.entity.FincaEntity;
 import com.sioma.spotsapi.infrastructure.persistence.entity.LoteEntity;
 import com.sioma.spotsapi.infrastructure.persistence.entity.PlantaEntity;
 import com.sioma.spotsapi.infrastructure.persistence.entity.UsuarioEntity;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class LoteJpaRepositoryTest extends PostgresContainerConfig {
@@ -33,7 +35,6 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
     private PlantaJpaRepository plantaRepository;
 
     @Test
-    @DisplayName("Should return true when lote already exists by fincaId and nombre ignore case")
     void shouldReturnTrueWhenLoteAlreadyExists(){
         // GIVEN
        UsuarioEntity usuario = usuarioRepository.save(
@@ -76,7 +77,6 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
     }
 
     @Test
-    @DisplayName("Should return false when lote does not exists by fincaId and nombre ignore case")
     void shouldReturnFalseWhenLoteDoesNotExists(){
         // WHEN
         boolean exists = repository.existsByNombreIgnoreCaseAndFincaId(
@@ -88,4 +88,84 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
         assertFalse(exists);
     }
 
+    @Test
+    void shouldReturnEmptyListWhenNoLotesFound(){
+        // GIVEN
+        UsuarioEntity usuario = usuarioRepository.save(
+                new UsuarioEntity(
+                        UsuarioFixtures.NOMBRE,
+                        UsuarioFixtures.EMAIL,
+                        UsuarioFixtures.PASSWORD
+                )
+        );
+
+        FincaEntity finca = fincaRepository.save(
+                new FincaEntity(
+                        FincaFixtures.NOMBRE,
+                        usuario.getId()
+                )
+        );
+
+        // WHEN
+        List<LoteEntity> lotes = repository.findAllByFincaId(finca.getId());
+
+        // THEN
+        assertTrue(lotes.isEmpty());
+    }
+
+    @Test
+    void shouldReturnLotesByFincaId(){
+        // GIVEN
+        UsuarioEntity usuario1 = usuarioRepository.save(
+                new UsuarioEntity(
+                        UsuarioFixtures.NOMBRE,
+                        UsuarioFixtures.EMAIL,
+                        UsuarioFixtures.PASSWORD
+                )
+        );
+        UsuarioEntity usuario2 = usuarioRepository.save(
+                new UsuarioEntity(
+                        UsuarioFixtures.NOMBRE,
+                        "otro@mail.com",
+                        UsuarioFixtures.PASSWORD
+                )
+        );
+
+        FincaEntity finca1 = fincaRepository.save(
+                new FincaEntity(
+                        FincaFixtures.NOMBRE,
+                        usuario1.getId()
+                )
+        );
+        FincaEntity finca2 = fincaRepository.save(
+                new FincaEntity(
+                        "Finca 2",
+                        usuario2.getId()
+                )
+        );
+
+        PlantaEntity planta = plantaRepository.save(
+                new PlantaEntity(
+                        PlantaFixtures.NOMBRE
+                )
+        );
+
+        repository.save(new LoteEntity("Lote 1", finca1.getId(), planta.getId()));
+        repository.save(new LoteEntity("Lote 2", finca1.getId(), planta.getId()));
+        repository.save(new LoteEntity("Lote 3", finca2.getId(), planta.getId()));
+
+        // WHEN
+        List<LoteEntity> lotes = repository.findAllByFincaId(finca1.getId());
+
+        // THEN
+        assertEquals(2, lotes.size());
+        assertTrue(lotes.stream()
+                .allMatch(l -> l.getFincaId()
+                        .equals(finca1.getId()))
+        );
+        assertEquals(Set.of("Lote 1", "Lote 2"), lotes.stream()
+                .map(LoteEntity::getNombre)
+                .collect(Collectors.toSet())
+        );
+    }
 }

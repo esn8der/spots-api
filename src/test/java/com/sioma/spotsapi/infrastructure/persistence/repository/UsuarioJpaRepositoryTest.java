@@ -22,7 +22,7 @@ class UsuarioJpaRepositoryTest extends PostgresContainerConfig{
         repository.save(new UsuarioEntity(
                 UsuarioFixtures.NOMBRE,
                 UsuarioFixtures.EMAIL,
-                UsuarioFixtures.PASSWORD_HASHED
+                UsuarioFixtures.PASSWORD
                 )
         );
 
