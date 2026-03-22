@@ -96,6 +96,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
+    @ExceptionHandler(InvalidGeocercaException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidGeocerca(InvalidGeocercaException ex) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "INVALID_GEOCERCA"
+        );
+
+        return ResponseEntity.status(status).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex){
 

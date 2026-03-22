@@ -1,23 +1,28 @@
 package com.sioma.spotsapi.domain.model;
 
+import org.locationtech.jts.geom.Geometry;
+
 public class Lote {
 
     private Long id;
     private final String nombre;
+    private final Geometry geocerca;
     private final Long fincaId;
     private final Long tipoCultivoId;
     private final boolean onAgp;
 
-    public Lote(Long id, String nombre, Long fincaId, Long tipoCultivoId) {
+    public Lote(Long id, String nombre, Geometry geocerca, Long fincaId, Long tipoCultivoId) {
         this.id = id;
         this.nombre = nombre;
+        this.geocerca = geocerca;
         this.fincaId = fincaId;
         this.tipoCultivoId = tipoCultivoId;
         this.onAgp = false;
     }
 
-    public Lote(String nombre, Long fincaId, Long tipoCultivoId) {
+    public Lote(String nombre, Geometry geocerca, Long fincaId, Long tipoCultivoId) {
         this.nombre = nombre;
+        this.geocerca = geocerca;
         this.fincaId = fincaId;
         this.tipoCultivoId = tipoCultivoId;
         this.onAgp = false;
@@ -31,6 +36,10 @@ public class Lote {
         return nombre;
     }
 
+    public Geometry getGeocerca() {
+        return geocerca;
+    }
+
     public Long getFincaId() {
         return fincaId;
     }
@@ -39,6 +48,7 @@ public class Lote {
         return tipoCultivoId;
     }
 
+    @SuppressWarnings("unused")
     public boolean isOnAgp() {
         return onAgp;
     }

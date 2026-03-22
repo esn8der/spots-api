@@ -25,13 +25,15 @@ public class LoteEntity {
     private Polygon geocerca;
 
     @Column(name = "on_agp")
-    private final boolean onAgp = false;
+    private boolean onAgp;
 
     public LoteEntity() {}
 
-    public LoteEntity(String nombre, Long fincaId, Long tipoCultivoId) {
+    public LoteEntity(String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
         this.nombre = nombre;
+        this.geocerca = geocerca;
         this.fincaId = fincaId;
         this.tipoCultivoId = tipoCultivoId;
+        this.onAgp = false;
     }
 }

@@ -2,8 +2,10 @@ package com.sioma.spotsapi.web.controller;
 
 import com.sioma.spotsapi.application.usecase.CreateLoteUseCase;
 import com.sioma.spotsapi.domain.model.Lote;
+import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
 import com.sioma.spotsapi.web.dto.CreateLoteRequest;
 import com.sioma.spotsapi.web.dto.LoteResponse;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +22,15 @@ public class LoteController {
 
     @PostMapping
     public LoteResponse create(@RequestBody CreateLoteRequest request){
-        Lote lote = useCase.execute(request.nombre(), request.fincaId(), request.tipoCultivoId());
+        Polygon polygon = GeometryFactoryProvider
+                .fromGeoJson(request.geocerca());
+
+        Lote lote = useCase.execute(
+                request.nombre(),
+                polygon,
+                request.fincaId(),
+                request.tipoCultivoId()
+        );
 
         return new LoteResponse(lote.getId(), lote.getNombre());
     }

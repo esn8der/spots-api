@@ -7,6 +7,7 @@ import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +22,7 @@ public class CreateLoteUseCase {
         this.plantaRepository = plantaRepository;
     }
 
-    public Lote execute(String nombre, Long fincaId, Long tipoCultivoId) {
+    public Lote execute(String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
 
         if(!fincaRepository.existsById(fincaId)) {
             throw new FincaNotExistsException(fincaId);
@@ -35,7 +36,7 @@ public class CreateLoteUseCase {
             throw new LoteAlreadyExistsException();
         }
 
-        Lote lote = new Lote(nombre, fincaId, tipoCultivoId);
+        Lote lote = new Lote(nombre, geocerca, fincaId, tipoCultivoId);
 
         return repository.save(lote);
     }

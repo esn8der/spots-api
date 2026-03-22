@@ -3,6 +3,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entity.LoteEntity;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,11 +18,16 @@ public class LoteRepositoryImpl implements LoteRepository {
 
     @Override
     public Lote save(Lote lote) {
-        LoteEntity entity = new LoteEntity(lote.getNombre(), lote.getFincaId(), lote.getTipoCultivoId());
+        LoteEntity entity = new LoteEntity(
+                lote.getNombre(),
+                (Polygon) lote.getGeocerca(),
+                lote.getFincaId(),
+                lote.getTipoCultivoId()
+        );
 
         entity = jpaRepository.save(entity);
 
-        return new Lote(entity.getId(), entity.getNombre(), entity.getFincaId(), entity.getTipoCultivoId());
+        return toDomain(entity);
     }
 
     @Override
@@ -41,6 +47,7 @@ public class LoteRepositoryImpl implements LoteRepository {
         return new Lote(
                 entity.getId(),
                 entity.getNombre(),
+                entity.getGeocerca(),
                 entity.getFincaId(),
                 entity.getTipoCultivoId()
         );
