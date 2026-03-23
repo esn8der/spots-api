@@ -10,6 +10,7 @@ import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Polygon;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -41,8 +42,12 @@ class CreateLoteUseCaseTest {
         givenFincaExists(false);
 
         // WHEN + THEN
+        Polygon geocerca = LoteFixtures.anyGeocerca();
+
         assertThrows(FincaNotExistsException.class,
-                () -> useCase.execute(LoteFixtures.NOMBRE,
+                () -> useCase.execute(
+                        LoteFixtures.NOMBRE,
+                        geocerca,
                         LoteFixtures.FINCA_ID,
                         LoteFixtures.TIPO_CULTIVO_ID)
         );
@@ -58,10 +63,13 @@ class CreateLoteUseCaseTest {
         givenPlantaExists(false);
 
         // WHEN + THEN
+        Polygon geocerca = LoteFixtures.anyGeocerca();
+
         assertThrows(
                 PlantaNotExistsException.class,
                 () -> useCase.execute(
                         LoteFixtures.NOMBRE,
+                        geocerca,
                         LoteFixtures.FINCA_ID,
                         LoteFixtures.TIPO_CULTIVO_ID
                 )
@@ -79,8 +87,11 @@ class CreateLoteUseCaseTest {
         givenLoteExists(true);
 
         // WHEN + THEN
+        Polygon geocerca = LoteFixtures.anyGeocerca();
+
         assertThrows(LoteAlreadyExistsException.class,
                 () -> useCase.execute(LoteFixtures.NOMBRE,
+                        geocerca,
                         LoteFixtures.FINCA_ID,
                         LoteFixtures.TIPO_CULTIVO_ID)
                 );
@@ -97,8 +108,11 @@ class CreateLoteUseCaseTest {
         givenLoteExists(false);
 
         //WHEN
+        Polygon geocerca = LoteFixtures.anyGeocerca();
+
         useCase.execute(
                 LoteFixtures.NOMBRE,
+                geocerca,
                 LoteFixtures.FINCA_ID,
                 LoteFixtures.TIPO_CULTIVO_ID
         );

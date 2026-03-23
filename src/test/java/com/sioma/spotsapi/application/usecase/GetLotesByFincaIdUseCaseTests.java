@@ -60,12 +60,9 @@ class GetLotesByFincaIdUseCaseTests {
     void shouldReturnLotesWhenLotesFoundForFinca(){
         // GIVEN
         when(fincaRepository.existsById(LoteFixtures.FINCA_ID)).thenReturn(true);
+
         List<Lote> expectedLotes = List.of(
-                new Lote(
-                        LoteFixtures.NOMBRE,
-                        LoteFixtures.FINCA_ID,
-                        LoteFixtures.TIPO_CULTIVO_ID
-                )
+                LoteFixtures.anyLote()
         );
         when(repository.findAllByFincaId(LoteFixtures.FINCA_ID)).thenReturn(expectedLotes);
 

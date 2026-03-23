@@ -10,6 +10,7 @@ import com.sioma.spotsapi.infrastructure.persistence.entity.LoteEntity;
 import com.sioma.spotsapi.infrastructure.persistence.entity.PlantaEntity;
 import com.sioma.spotsapi.infrastructure.persistence.entity.UsuarioEntity;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
@@ -58,9 +59,12 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
                 )
         );
 
+        Polygon geocerca = LoteFixtures.anyGeocerca();
+
         repository.save(
                 new LoteEntity(
                         LoteFixtures.NOMBRE,
+                        geocerca,
                         finca.getId(),
                         planta.getId()
                 )
@@ -150,9 +154,11 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
                 )
         );
 
-        repository.save(new LoteEntity("Lote 1", finca1.getId(), planta.getId()));
-        repository.save(new LoteEntity("Lote 2", finca1.getId(), planta.getId()));
-        repository.save(new LoteEntity("Lote 3", finca2.getId(), planta.getId()));
+        Polygon geocerca = LoteFixtures.anyGeocerca();
+
+        repository.save(new LoteEntity("Lote 1", geocerca, finca1.getId(), planta.getId()));
+        repository.save(new LoteEntity("Lote 2", geocerca, finca1.getId(), planta.getId()));
+        repository.save(new LoteEntity("Lote 3", geocerca, finca2.getId(), planta.getId()));
 
         // WHEN
         List<LoteEntity> lotes = repository.findAllByFincaId(finca1.getId());
