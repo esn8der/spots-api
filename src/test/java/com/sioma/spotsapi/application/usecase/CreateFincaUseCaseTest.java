@@ -2,7 +2,7 @@ package com.sioma.spotsapi.application.usecase;
 
 import com.sioma.spotsapi.fixtures.FincaFixtures;
 import com.sioma.spotsapi.domain.exception.FincaAlreadyExistsException;
-import com.sioma.spotsapi.domain.exception.UsuarioNotExistsException;
+import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
@@ -37,7 +37,7 @@ class CreateFincaUseCaseTest {
 
         // WHEN + THEN
         assertThrows(
-                UsuarioNotExistsException.class,
+                UsuarioNotFoundException.class,
                 () -> useCase.execute(
                         FincaFixtures.NOMBRE,
                         FincaFixtures.USUARIO_ID

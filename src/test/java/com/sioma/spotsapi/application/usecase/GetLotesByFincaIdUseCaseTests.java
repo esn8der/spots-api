@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.domain.exception.FincaNotExistsException;
+import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
@@ -34,7 +34,7 @@ class GetLotesByFincaIdUseCaseTests {
         when(fincaRepository.existsById(LoteFixtures.FINCA_ID)).thenReturn(false);
 
         // WHEN + THEN
-        assertThrows(FincaNotExistsException.class,
+        assertThrows(FincaNotFoundException.class,
                 () -> useCase.execute(LoteFixtures.FINCA_ID)
         );
 

@@ -1,9 +1,9 @@
 package com.sioma.spotsapi.application.usecase;
 
 import com.sioma.spotsapi.fixtures.LoteFixtures;
-import com.sioma.spotsapi.domain.exception.FincaNotExistsException;
+import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.exception.LoteAlreadyExistsException;
-import com.sioma.spotsapi.domain.exception.PlantaNotExistsException;
+import com.sioma.spotsapi.domain.exception.PlantaNotFoundException;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
@@ -44,7 +44,7 @@ class CreateLoteUseCaseTest {
         // WHEN + THEN
         Polygon geocerca = LoteFixtures.anyGeocerca();
 
-        assertThrows(FincaNotExistsException.class,
+        assertThrows(FincaNotFoundException.class,
                 () -> useCase.execute(
                         LoteFixtures.NOMBRE,
                         geocerca,
@@ -66,7 +66,7 @@ class CreateLoteUseCaseTest {
         Polygon geocerca = LoteFixtures.anyGeocerca();
 
         assertThrows(
-                PlantaNotExistsException.class,
+                PlantaNotFoundException.class,
                 () -> useCase.execute(
                         LoteFixtures.NOMBRE,
                         geocerca,

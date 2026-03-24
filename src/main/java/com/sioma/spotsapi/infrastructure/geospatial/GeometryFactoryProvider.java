@@ -1,6 +1,7 @@
 package com.sioma.spotsapi.infrastructure.geospatial;
 
-import com.sioma.spotsapi.domain.exception.InvalidGeocercaException;
+import com.sioma.spotsapi.domain.exception.InvalidGeoSpatialException;
+import com.sioma.spotsapi.web.dto.GeoJsonPoint;
 import com.sioma.spotsapi.web.dto.GeoJsonPolygon;
 import org.locationtech.jts.geom.*;
 
@@ -18,13 +19,13 @@ public class GeometryFactoryProvider {
         List<List<Double>> coords = geoJson.coordinates().getFirst();
 
         if (coords == null || coords.size() < 4) {
-            throw new InvalidGeocercaException(
+            throw new InvalidGeoSpatialException(
                     "Un polígono debe tener al menos 4 puntos"
             );
         }
 
         if (!coords.getFirst().equals(coords.getLast())) {
-            throw new InvalidGeocercaException(
+            throw new InvalidGeoSpatialException(
                     "El polígono debe estar cerrado (primer punto igual al último)"
             );
         }
@@ -39,7 +40,7 @@ public class GeometryFactoryProvider {
 
             // Validar geometría
             if (!polygon.isValid()) {
-                throw new InvalidGeocercaException(
+                throw new InvalidGeoSpatialException(
                         "La geocerca no es válida (puede estar autointersectada)"
                 );
             }
@@ -47,7 +48,24 @@ public class GeometryFactoryProvider {
             return polygon;
 
         } catch (IllegalArgumentException _) {
-            throw new InvalidGeocercaException("Formato de geocerca inválido");
+            throw new InvalidGeoSpatialException("Formato de geocerca inválido");
         }
+    }
+
+    public static Point fromGeoJsonPoint(GeoJsonPoint geoJson) {
+
+        if (!"Point".equalsIgnoreCase(geoJson.type())) {
+            throw new InvalidGeoSpatialException("El tipo debe ser Point");
+        }
+
+        List<Double> coords = geoJson.coordinates();
+
+        if (coords.size() != 2) {
+            throw new InvalidGeoSpatialException("Un punto debe tener 2 coordenadas");
+        }
+
+        return geometryFactory.createPoint(
+                new Coordinate(coords.getFirst(), coords.get(1)) // lng, lat
+        );
     }
 }
