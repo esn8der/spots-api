@@ -1,8 +1,8 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.domain.exception.FincaNotExistsException;
+import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.exception.LoteAlreadyExistsException;
-import com.sioma.spotsapi.domain.exception.PlantaNotExistsException;
+import com.sioma.spotsapi.domain.exception.PlantaNotFoundException;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
@@ -25,11 +25,11 @@ public class CreateLoteUseCase {
     public Lote execute(String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
 
         if(!fincaRepository.existsById(fincaId)) {
-            throw new FincaNotExistsException(fincaId);
+            throw new FincaNotFoundException(fincaId);
         }
 
         if(!plantaRepository.existsById(tipoCultivoId)) {
-            throw new PlantaNotExistsException(tipoCultivoId);
+            throw new PlantaNotFoundException(tipoCultivoId);
         }
 
         if(repository.existsByNombreIgnoreCaseAndFincaId(nombre, fincaId)) {

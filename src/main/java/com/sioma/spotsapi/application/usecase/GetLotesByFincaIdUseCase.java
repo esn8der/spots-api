@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.domain.exception.FincaNotExistsException;
+import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
@@ -20,7 +20,7 @@ public class GetLotesByFincaIdUseCase {
 
     public List<Lote> execute(Long id) {
         if(!fincaRepository.existsById(id)) {
-            throw new FincaNotExistsException(id);
+            throw new FincaNotFoundException(id);
         }
 
         return repository.findAllByFincaId(id);

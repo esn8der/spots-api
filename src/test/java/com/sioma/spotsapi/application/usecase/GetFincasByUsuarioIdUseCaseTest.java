@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.domain.exception.UsuarioNotExistsException;
+import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
@@ -34,7 +34,7 @@ class GetFincasByUsuarioIdUseCaseTest {
         when(usuarioRepository.existsById(FincaFixtures.USUARIO_ID)).thenReturn(false);
 
         // WHEN + THEN
-        assertThrows(UsuarioNotExistsException.class,
+        assertThrows(UsuarioNotFoundException.class,
                 () -> useCase.execute(FincaFixtures.USUARIO_ID
                 )
         );

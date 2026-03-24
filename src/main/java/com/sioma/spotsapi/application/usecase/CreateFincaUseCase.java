@@ -1,7 +1,7 @@
 package com.sioma.spotsapi.application.usecase;
 
 import com.sioma.spotsapi.domain.exception.FincaAlreadyExistsException;
-import com.sioma.spotsapi.domain.exception.UsuarioNotExistsException;
+import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
@@ -20,7 +20,7 @@ public class CreateFincaUseCase {
     public Finca execute(String nombre, Long usuarioId) {
 
         if (!usuarioRepository.existsById(usuarioId)) {
-            throw new UsuarioNotExistsException(usuarioId);
+            throw new UsuarioNotFoundException(usuarioId);
         }
         if (fincaRepository.existsByNombreIgnoreCaseAndUsuarioId(nombre, usuarioId)) {
             throw new FincaAlreadyExistsException();

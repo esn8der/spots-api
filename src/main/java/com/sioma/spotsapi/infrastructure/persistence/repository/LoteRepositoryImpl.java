@@ -7,6 +7,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class LoteRepositoryImpl implements LoteRepository {
@@ -28,6 +29,17 @@ public class LoteRepositoryImpl implements LoteRepository {
         entity = jpaRepository.save(entity);
 
         return toDomain(entity);
+    }
+
+    @Override
+    public Optional<Lote> findById(Long id) {
+        return jpaRepository.findById(id)
+                .map(this::toDomain);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return jpaRepository.existsById(id);
     }
 
     @Override

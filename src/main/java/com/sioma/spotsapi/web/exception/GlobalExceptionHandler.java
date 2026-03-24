@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.web.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 import com.sioma.spotsapi.domain.exception.*;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +20,7 @@ public class GlobalExceptionHandler {
                 status.value(),
                 ex.getMessage(),
                 "PLANTA_ALREADY_EXISTS"
-                );
-
+        );
         return ResponseEntity.status(status).body(error);
     }
 
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
                 status.value(),
                 ex.getMessage(),
                 "USUARIO_ALREADY_EXISTS"
-                );
+        );
         return ResponseEntity.status(status).body(error);
     }
 
@@ -44,43 +44,43 @@ public class GlobalExceptionHandler {
                 status.value(),
                 ex.getMessage(),
                 "FINCA_ALREADY_EXISTS"
-                );
+        );
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(UsuarioNotExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUsuarioNotExists(UsuarioNotExistsException ex) {
+    @ExceptionHandler(UsuarioNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsuarioNotExists(UsuarioNotFoundException ex) {
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
                 status.value(),
                 ex.getMessage(),
                 "USUARIO_NOT_EXISTS"
-                );
+        );
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(FincaNotExistsException.class)
-    public ResponseEntity<ErrorResponse> handleFincaNotExists(FincaNotExistsException ex) {
+    @ExceptionHandler(FincaNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleFincaNotExists(FincaNotFoundException ex) {
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
                 status.value(),
                 ex.getMessage(),
                 "FINCA_NOT_EXISTS"
-                );
+        );
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(PlantaNotExistsException.class)
-    public ResponseEntity<ErrorResponse> handlePlantaNotExists(PlantaNotExistsException ex) {
+    @ExceptionHandler(PlantaNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePlantaNotExists(PlantaNotFoundException ex) {
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
                 status.value(),
                 ex.getMessage(),
                 "PLANTA_NOT_EXISTS"
-                );
+        );
         return ResponseEntity.status(status).body(error);
     }
 
@@ -92,12 +92,12 @@ public class GlobalExceptionHandler {
                 status.value(),
                 ex.getMessage(),
                 "LOTE_ALREADY_EXISTS"
-                );
+        );
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(InvalidGeocercaException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidGeocerca(InvalidGeocercaException ex) {
+    @ExceptionHandler(InvalidGeoSpatialException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidGeocerca(InvalidGeoSpatialException ex) {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
@@ -106,12 +106,80 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 "INVALID_GEOCERCA"
         );
-
         return ResponseEntity.status(status).body(error);
     }
 
+    @ExceptionHandler(LoteNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLoteNotExists(LoteNotFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "LOTE_NOT_EXISTS"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(SpotAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleSpotExists(SpotAlreadyExistsException ex) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "SPOT_ALREADY_EXISTS"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(PointOutsideLoteException.class)
+    public ResponseEntity<ErrorResponse> handlePointOutsideLote(PointOutsideLoteException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "POINT_OUTSIDE_LOTE"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(SpotAlreadyExistsNearbyException.class)
+    public ResponseEntity<ErrorResponse> handleSpotExistsNearby(SpotAlreadyExistsNearbyException ex) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "SPOT_ALREADY_EXISTS_NEARBY"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+
+        String message = ex.getMostSpecificCause().getMessage();
+
+        if (message != null && message.contains("idx_spot_lote_geo_unique")) {
+
+            ErrorResponse error = new ErrorResponse(
+                    HttpStatus.CONFLICT.value(),
+                    "Ya existe un spot en esa ubicación",
+                    "SPOT_DUPLICATE_LOCATION"
+            );
+
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Violación de integridad de datos",
+                "DATA_INTEGRITY_VIOLATION"
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex){
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
 
         log.error("Unexpected error occurred", ex);
 
