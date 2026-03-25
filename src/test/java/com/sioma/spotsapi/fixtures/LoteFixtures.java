@@ -23,6 +23,59 @@ public class LoteFixtures {
         return factory.createPolygon(shell);
     }
 
+    public static Lote loteContainingPoint(Point point) {
+        GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
+
+        double x = point.getX();
+        double y = point.getY();
+
+        Coordinate[] coordinates = new Coordinate[]{
+                new Coordinate(x - 0.001, y - 0.001),
+                new Coordinate(x + 0.001, y - 0.001),
+                new Coordinate(x + 0.001, y + 0.001),
+                new Coordinate(x - 0.001, y + 0.001),
+                new Coordinate(x - 0.001, y - 0.001) // cerrar polígono
+        };
+
+        LinearRing shell = factory.createLinearRing(coordinates);
+        Polygon polygon = factory.createPolygon(shell);
+
+        return new Lote(
+                1L,
+                "Lote dentro",
+                polygon,
+                1L,
+                1L
+        );
+    }
+
+    public static Lote loteNOTContainingPoint(Point point) {
+        GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
+
+        double x = point.getX();
+        double y = point.getY();
+
+        // Creamos un polígono lejos del punto (lo desplazamos)
+        Coordinate[] coordinates = new Coordinate[]{
+                new Coordinate(x + 1, y + 1),
+                new Coordinate(x + 2, y + 1),
+                new Coordinate(x + 2, y + 2),
+                new Coordinate(x + 1, y + 2),
+                new Coordinate(x + 1, y + 1) // cerrar
+        };
+
+        LinearRing shell = factory.createLinearRing(coordinates);
+        Polygon polygon = factory.createPolygon(shell);
+
+        return new Lote(
+                1L,
+                "Lote fuera",
+                polygon,
+                1L,
+                1L
+        );
+    }
+
     public static Lote anyLote() {
         return new Lote(
                 NOMBRE,

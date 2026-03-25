@@ -3,8 +3,8 @@ package com.sioma.spotsapi.domain.model;
 public class Usuario {
     private Long id;
     private final String nombre;
-    private String email;
-    private String password;
+    private final String email;
+    private final String password;
 
     public Usuario(Long id, String nombre, String email, String password) {
         this.id = id;
