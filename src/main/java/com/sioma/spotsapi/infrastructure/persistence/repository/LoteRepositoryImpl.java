@@ -2,7 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
-import com.sioma.spotsapi.infrastructure.persistence.entity.LoteEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entities.LoteEntity;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Repository;
 
@@ -35,11 +35,6 @@ public class LoteRepositoryImpl implements LoteRepository {
     public Optional<Lote> findById(Long id) {
         return jpaRepository.findById(id)
                 .map(this::toDomain);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return jpaRepository.existsById(id);
     }
 
     @Override

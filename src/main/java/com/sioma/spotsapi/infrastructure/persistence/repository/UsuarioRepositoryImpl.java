@@ -2,7 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
-import com.sioma.spotsapi.infrastructure.persistence.entity.UsuarioEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entities.UsuarioEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository

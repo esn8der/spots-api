@@ -1,4 +1,4 @@
-package com.sioma.spotsapi.infrastructure.persistence.entity;
+package com.sioma.spotsapi.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;

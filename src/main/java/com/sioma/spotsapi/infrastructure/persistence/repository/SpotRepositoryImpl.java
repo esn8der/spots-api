@@ -2,7 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Spot;
 import com.sioma.spotsapi.domain.repository.SpotRepository;
-import com.sioma.spotsapi.infrastructure.persistence.entity.SpotEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entities.SpotEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository

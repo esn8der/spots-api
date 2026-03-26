@@ -2,7 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
-import com.sioma.spotsapi.infrastructure.persistence.entity.FincaEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entities.FincaEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
