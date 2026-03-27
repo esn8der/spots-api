@@ -61,7 +61,7 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
 
         Polygon geocerca = LoteFixtures.anyGeocerca();
 
-        repository.save(
+        LoteEntity lote = repository.save(
                 new LoteEntity(
                         LoteFixtures.NOMBRE,
                         geocerca,
@@ -72,8 +72,8 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
 
         // WHEN
         boolean exists = repository.existsByNombreIgnoreCaseAndFincaId(
-                LoteFixtures.NOMBRE.toUpperCase(),
-                LoteFixtures.FINCA_ID
+                lote.getNombre().toUpperCase(),
+                lote.getFincaId()
         );
 
         // THEN

@@ -1,12 +1,14 @@
 package com.sioma.spotsapi.web.controller;
 
-import org.springframework.web.bind.annotation.*;
-import com.sioma.spotsapi.web.dto.FincaResponse;
+import com.sioma.spotsapi.application.mapper.FincaMapper;
+import com.sioma.spotsapi.application.mapper.LoteMapper;
 import com.sioma.spotsapi.application.usecase.CreateFincaUseCase;
 import com.sioma.spotsapi.application.usecase.GetLotesByFincaIdUseCase;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.web.dto.CreateFincaRequest;
+import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.LoteResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -15,25 +17,30 @@ import java.util.List;
 public class FincaController {
     private final CreateFincaUseCase useCase;
     private final GetLotesByFincaIdUseCase getLotesByFincaIdUseCase;
+    private final FincaMapper fincaMapper;
+    private final LoteMapper loteMapper;
 
-    public FincaController(CreateFincaUseCase useCase, GetLotesByFincaIdUseCase getLotesByFincaIdUseCase) {
+    public FincaController(
+            CreateFincaUseCase useCase,
+            GetLotesByFincaIdUseCase getLotesByFincaIdUseCase,
+            FincaMapper fincaMapper,
+            LoteMapper loteMapper) {
         this.useCase = useCase;
         this.getLotesByFincaIdUseCase = getLotesByFincaIdUseCase;
+        this.fincaMapper = fincaMapper;
+        this.loteMapper = loteMapper;
     }
 
     @PostMapping
     public FincaResponse create(@RequestBody CreateFincaRequest request) {
         Finca finca = useCase.execute(request.nombre(), request.usuarioId());
-
-        return new FincaResponse(finca.getId(), finca.getNombre());
+        return fincaMapper.toResponse(finca);
     }
 
     @GetMapping("/{id}/lotes")
     public List<LoteResponse> getLotesByFinca(@PathVariable Long id) {
-
-        return getLotesByFincaIdUseCase.execute(id)
-                .stream()
-                .map(l -> new LoteResponse(l.getId(), l.getNombre()))
-                .toList();
+        return loteMapper.toResponseList(
+                getLotesByFincaIdUseCase.execute(id)
+        );
     }
 }

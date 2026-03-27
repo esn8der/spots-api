@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.web.controller;
 
+import com.sioma.spotsapi.application.mapper.LoteMapper;
 import com.sioma.spotsapi.application.usecase.CreateLoteUseCase;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/lotes")
 public class LoteController {
     private final CreateLoteUseCase useCase;
+    private final LoteMapper loteMapper;
 
-    public LoteController(CreateLoteUseCase useCase) {
+    public LoteController(CreateLoteUseCase useCase, LoteMapper loteMapper) {
         this.useCase = useCase;
+        this.loteMapper = loteMapper;
     }
 
     @PostMapping
@@ -32,6 +35,6 @@ public class LoteController {
                 request.tipoCultivoId()
         );
 
-        return new LoteResponse(lote.getId(), lote.getNombre());
+        return loteMapper.toResponse(lote);
     }
 }

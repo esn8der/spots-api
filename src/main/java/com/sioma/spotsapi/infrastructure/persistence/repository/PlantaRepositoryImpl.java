@@ -4,6 +4,7 @@ import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entities.PlantaEntity;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 @Repository
@@ -22,7 +23,7 @@ public class PlantaRepositoryImpl implements PlantaRepository {
 
         entity = jpaRepository.save(entity);
 
-        return new Planta(entity.getId(), entity.getNombre());
+        return toDomain(entity);
     }
 
     @Override
@@ -39,10 +40,11 @@ public class PlantaRepositoryImpl implements PlantaRepository {
     public List<Planta> findAll() {
         return jpaRepository.findAll()
                 .stream()
-                .map(entity -> new Planta(
-                        entity.getId(),
-                        entity.getNombre()
-                ))
+                .map(this::toDomain)
                 .toList();
+    }
+
+    private Planta toDomain(PlantaEntity entity) {
+        return new Planta(entity.getId(), entity.getNombre());
     }
 }

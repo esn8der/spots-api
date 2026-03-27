@@ -35,7 +35,7 @@ class FincaJpaRepositoryTest extends PostgresContainerConfig {
                 )
         );
 
-        repository.save(
+        FincaEntity finca = repository.save(
                 new FincaEntity(
                         FincaFixtures.NOMBRE,
                         usuario.getId()
@@ -44,8 +44,8 @@ class FincaJpaRepositoryTest extends PostgresContainerConfig {
 
         // WHEN
         boolean exists = repository.existsByNombreIgnoreCaseAndUsuarioId(
-                FincaFixtures.NOMBRE.toUpperCase(),
-                FincaFixtures.USUARIO_ID
+                finca.getNombre().toUpperCase(),
+                finca.getUsuarioId()
         );
 
         // THEN

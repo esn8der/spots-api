@@ -17,7 +17,7 @@ public class FincaRepositoryImpl implements FincaRepository {
     }
 
     @Override
-    public Finca save (Finca finca){
+    public Finca save(Finca finca) {
 
         FincaEntity entity = new FincaEntity(finca.getNombre(), finca.getUsuarioId());
 

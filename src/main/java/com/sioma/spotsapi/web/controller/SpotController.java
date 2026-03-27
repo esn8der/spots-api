@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.web.controller;
 
+import com.sioma.spotsapi.application.mapper.SpotMapper;
 import com.sioma.spotsapi.application.usecase.CreateSpotUseCase;
 import com.sioma.spotsapi.domain.model.Spot;
 import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/spots")
 public class SpotController {
     private final CreateSpotUseCase useCase;
+    private final SpotMapper spotMapper;
 
-    public SpotController(CreateSpotUseCase useCase) {
+    public SpotController(CreateSpotUseCase useCase, SpotMapper spotMapper) {
         this.useCase = useCase;
+        this.spotMapper = spotMapper;
     }
 
     @PostMapping
@@ -31,6 +34,6 @@ public class SpotController {
                 request.posicion()
         );
 
-        return new SpotResponse(spot.getId(), spot.getLinea(), spot.getPosicion());
+        return spotMapper.toResponse(spot);
     }
 }

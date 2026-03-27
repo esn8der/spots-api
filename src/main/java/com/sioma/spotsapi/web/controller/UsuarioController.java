@@ -1,12 +1,14 @@
 package com.sioma.spotsapi.web.controller;
 
-import org.springframework.web.bind.annotation.*;
+import com.sioma.spotsapi.application.mapper.FincaMapper;
+import com.sioma.spotsapi.application.mapper.UsuarioMapper;
 import com.sioma.spotsapi.application.usecase.CreateUsuarioUseCase;
 import com.sioma.spotsapi.application.usecase.GetFincasByUsuarioIdUseCase;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.web.dto.CreateUsuarioRequest;
 import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.UsuarioResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -15,10 +17,18 @@ import java.util.List;
 public class UsuarioController {
     private final CreateUsuarioUseCase useCase;
     private final GetFincasByUsuarioIdUseCase getFincasByUsuarioIdUseCase;
+    private final UsuarioMapper usuarioMapper;
+    private final FincaMapper fincaMapper;
 
-    public UsuarioController(CreateUsuarioUseCase useCase, GetFincasByUsuarioIdUseCase getFincasByUsuarioIdUseCase) {
+    public UsuarioController(
+            CreateUsuarioUseCase useCase,
+            GetFincasByUsuarioIdUseCase getFincasByUsuarioIdUseCase,
+            UsuarioMapper usuarioMapper,
+            FincaMapper fincaMapper) {
         this.useCase = useCase;
         this.getFincasByUsuarioIdUseCase = getFincasByUsuarioIdUseCase;
+        this.usuarioMapper = usuarioMapper;
+        this.fincaMapper = fincaMapper;
     }
 
     @PostMapping
@@ -28,20 +38,13 @@ public class UsuarioController {
                 request.email(),
                 request.password()
         );
-
-        return new UsuarioResponse(
-                usuario.getId(),
-                usuario.getNombre(),
-                usuario.getEmail()
-        );
+        return usuarioMapper.toResponse(usuario);
     }
 
     @GetMapping("/{id}/fincas")
     public List<FincaResponse> getFincasByUsuario(@PathVariable Long id) {
-
-        return getFincasByUsuarioIdUseCase.execute(id)
-                .stream()
-                .map(f -> new FincaResponse(f.getId(), f.getNombre()))
-                .toList();
+        return fincaMapper.toResponseList(
+                getFincasByUsuarioIdUseCase.execute(id)
+        );
     }
 }

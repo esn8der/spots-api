@@ -15,12 +15,12 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     }
 
     @Override
-    public Usuario save(Usuario usuario){
+    public Usuario save(Usuario usuario) {
         UsuarioEntity entity = new UsuarioEntity(usuario.getNombre(), usuario.getEmail(), usuario.getPassword());
 
         entity = jpaRepository.save(entity);
 
-        return new Usuario(entity.getId(), entity.getNombre(), entity.getEmail(), entity.getPassword());
+        return toDomain(entity);
     }
 
     @Override
@@ -31,5 +31,9 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     @Override
     public boolean existsById(Long id) {
         return jpaRepository.existsById(id);
+    }
+
+    private Usuario toDomain(UsuarioEntity entity) {
+        return new Usuario(entity.getId(), entity.getNombre(), entity.getEmail(), entity.getPassword());
     }
 }
