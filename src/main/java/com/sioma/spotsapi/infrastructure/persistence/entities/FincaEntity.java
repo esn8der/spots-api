@@ -12,9 +12,10 @@ public class FincaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "usuario_id")
+    @Column(name = "usuario_id", nullable = false)
     private Long usuarioId;
 
     public FincaEntity() {}

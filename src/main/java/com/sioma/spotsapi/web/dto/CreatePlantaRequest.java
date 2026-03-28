@@ -1,3 +1,6 @@
 package com.sioma.spotsapi.web.dto;
 
-public record CreatePlantaRequest(String nombre) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record CreatePlantaRequest(@NotBlank String nombre) {
+}

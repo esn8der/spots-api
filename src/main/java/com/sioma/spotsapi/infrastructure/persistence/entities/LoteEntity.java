@@ -13,12 +13,13 @@ public class LoteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "finca_id")
+    @Column(name = "finca_id", nullable = false)
     private Long fincaId;
 
-    @Column(name = "tipo_cultivo")
+    @Column(name = "tipo_cultivo", nullable = false)
     private Long tipoCultivoId;
 
     @Column(columnDefinition = "geography(Polygon,4326)")

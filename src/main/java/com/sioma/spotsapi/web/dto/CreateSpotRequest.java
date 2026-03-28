@@ -1,8 +1,11 @@
 package com.sioma.spotsapi.web.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public record CreateSpotRequest(
-        GeoJsonPoint coordenada,
-        Long loteId,
-        int linea,
-        int posicion
-) {}
+        @NotNull GeoJsonPoint coordenada,
+        @NotNull Long loteId,
+        @NotNull int linea,
+        @NotNull int posicion
+) {
+}

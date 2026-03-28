@@ -8,4 +8,5 @@ public record CreateLoteRequest(
         @NotNull GeoJsonPolygon geocerca,
         @NotNull Long fincaId,
         @NotNull Long tipoCultivoId
-) {}
+) {
+}
