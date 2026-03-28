@@ -6,6 +6,7 @@ import com.sioma.spotsapi.domain.model.Spot;
 import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
 import com.sioma.spotsapi.web.dto.CreateSpotRequest;
 import com.sioma.spotsapi.web.dto.SpotResponse;
+import jakarta.validation.Valid;
 import org.locationtech.jts.geom.Point;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ public class SpotController {
     }
 
     @PostMapping
-    public SpotResponse create(@RequestBody CreateSpotRequest request) {
+    public SpotResponse create(@Valid @RequestBody CreateSpotRequest request) {
         Point point = GeometryFactoryProvider.fromGeoJsonPoint(request.coordenada());
 
         Spot spot = useCase.execute(

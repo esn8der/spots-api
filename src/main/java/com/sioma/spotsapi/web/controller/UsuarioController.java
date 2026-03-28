@@ -8,6 +8,7 @@ import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.web.dto.CreateUsuarioRequest;
 import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.UsuarioResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public UsuarioResponse create(@RequestBody CreateUsuarioRequest request) {
+    public UsuarioResponse create(@Valid @RequestBody CreateUsuarioRequest request) {
         Usuario usuario = useCase.execute(
                 request.nombre(),
                 request.email(),

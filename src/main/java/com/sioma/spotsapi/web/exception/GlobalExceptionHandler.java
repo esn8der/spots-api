@@ -1,11 +1,14 @@
 package com.sioma.spotsapi.web.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import com.sioma.spotsapi.domain.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
@@ -176,6 +179,30 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        List<ErrorResponse.FieldError> fieldErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> new ErrorResponse.FieldError(
+                        error.getField(),
+                        error.getDefaultMessage() != null ? error.getDefaultMessage() : "Campo inválido"
+                ))
+                .toList();
+
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                "Error de validación de datos",
+                "VALIDATION_ERROR",
+                fieldErrors
+        );
+
+        return ResponseEntity.status(status).body(error);
     }
 
     @ExceptionHandler(Exception.class)

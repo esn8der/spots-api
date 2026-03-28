@@ -5,6 +5,7 @@ import com.sioma.spotsapi.application.usecase.CreatePlantaUseCase;
 import com.sioma.spotsapi.application.usecase.GetPlantasUseCase;
 import com.sioma.spotsapi.web.dto.CreatePlantaRequest;
 import com.sioma.spotsapi.web.dto.PlantaResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class PlantaController {
     }
 
     @PostMapping
-    public PlantaResponse create(@RequestBody CreatePlantaRequest request) {
+    public PlantaResponse create(@Valid @RequestBody CreatePlantaRequest request) {
         return plantaMapper.toResponse(
                 createPlantaUseCase.execute(request.nombre())
         );

@@ -13,13 +13,16 @@ public class SpotEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "geo", columnDefinition = "geography(Point,4326)")
+    @Column(name = "geo", columnDefinition = "geography(Point,4326)", nullable = false)
     private Point coordenada;
 
-    @Column(name = "lote_id")
+    @Column(name = "lote_id", nullable = false)
     private Long loteId;
 
+    @Column(nullable = false)
     private int linea;
+
+    @Column(nullable = false)
     private int posicion;
 
     public SpotEntity() {}

@@ -8,6 +8,7 @@ import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.web.dto.CreateFincaRequest;
 import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.LoteResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class FincaController {
     }
 
     @PostMapping
-    public FincaResponse create(@RequestBody CreateFincaRequest request) {
+    public FincaResponse create(@Valid @RequestBody CreateFincaRequest request) {
         Finca finca = useCase.execute(request.nombre(), request.usuarioId());
         return fincaMapper.toResponse(finca);
     }

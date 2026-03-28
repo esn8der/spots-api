@@ -1,7 +1,10 @@
 package com.sioma.spotsapi.web.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public record SpotResponse(
-        Long id,
-        int linea,
-        int posicion
-) {}
+        @NotNull Long id,
+        @NotNull int linea,
+        @NotNull int posicion
+) {
+}

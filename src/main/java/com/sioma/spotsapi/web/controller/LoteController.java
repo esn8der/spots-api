@@ -6,6 +6,7 @@ import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
 import com.sioma.spotsapi.web.dto.CreateLoteRequest;
 import com.sioma.spotsapi.web.dto.LoteResponse;
+import jakarta.validation.Valid;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ public class LoteController {
     }
 
     @PostMapping
-    public LoteResponse create(@RequestBody CreateLoteRequest request){
+    public LoteResponse create(@Valid @RequestBody CreateLoteRequest request) {
         Polygon polygon = GeometryFactoryProvider
                 .fromGeoJson(request.geocerca());
 
