@@ -9,12 +9,17 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE;
 
 @DataJpaTest
-class SpotJpaRepositoryTest extends PostgresContainerConfig {
+@Import(PostgresContainerConfig.class)
+@AutoConfigureTestDatabase(replace = NONE)
+class SpotJpaRepositoryTest {
 
     @Autowired
     private SpotJpaRepository repository;

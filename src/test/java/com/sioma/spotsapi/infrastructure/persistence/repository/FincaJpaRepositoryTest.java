@@ -8,15 +8,20 @@ import com.sioma.spotsapi.infrastructure.persistence.entities.UsuarioEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE;
 
 @DataJpaTest
-class FincaJpaRepositoryTest extends PostgresContainerConfig {
+@Import(PostgresContainerConfig.class)
+@AutoConfigureTestDatabase(replace = NONE)
+class FincaJpaRepositoryTest {
 
     @Autowired
     private FincaJpaRepository repository;

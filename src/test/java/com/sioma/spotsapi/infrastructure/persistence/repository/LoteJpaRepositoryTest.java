@@ -13,15 +13,20 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE;
 
 @DataJpaTest
-class LoteJpaRepositoryTest extends PostgresContainerConfig {
+@Import(PostgresContainerConfig.class)
+@AutoConfigureTestDatabase(replace = NONE)
+class LoteJpaRepositoryTest {
 
     @Autowired
     private LoteJpaRepository repository;
@@ -36,9 +41,9 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
     private PlantaJpaRepository plantaRepository;
 
     @Test
-    void shouldReturnTrueWhenLoteAlreadyExists(){
+    void shouldReturnTrueWhenLoteAlreadyExists() {
         // GIVEN
-       UsuarioEntity usuario = usuarioRepository.save(
+        UsuarioEntity usuario = usuarioRepository.save(
                 new UsuarioEntity(
                         UsuarioFixtures.NOMBRE,
                         UsuarioFixtures.EMAIL,
@@ -46,14 +51,14 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
                 )
         );
 
-       FincaEntity finca = fincaRepository.save(
+        FincaEntity finca = fincaRepository.save(
                 new FincaEntity(
                         FincaFixtures.NOMBRE,
                         usuario.getId()
                 )
         );
 
-       PlantaEntity planta = plantaRepository.save(
+        PlantaEntity planta = plantaRepository.save(
                 new PlantaEntity(
                         PlantaFixtures.NOMBRE
                 )
@@ -81,7 +86,7 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
     }
 
     @Test
-    void shouldReturnFalseWhenLoteDoesNotExists(){
+    void shouldReturnFalseWhenLoteDoesNotExists() {
         // WHEN
         boolean exists = repository.existsByNombreIgnoreCaseAndFincaId(
                 "Otro lote",
@@ -93,7 +98,7 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoLotesFound(){
+    void shouldReturnEmptyListWhenNoLotesFound() {
         // GIVEN
         UsuarioEntity usuario = usuarioRepository.save(
                 new UsuarioEntity(
@@ -118,7 +123,7 @@ class LoteJpaRepositoryTest extends PostgresContainerConfig {
     }
 
     @Test
-    void shouldReturnLotesByFincaId(){
+    void shouldReturnLotesByFincaId() {
         // GIVEN
         UsuarioEntity usuario1 = usuarioRepository.save(
                 new UsuarioEntity(
