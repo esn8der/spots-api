@@ -3,6 +3,7 @@ package com.sioma.spotsapi.web.controller;
 import com.sioma.spotsapi.application.mapper.FincaMapper;
 import com.sioma.spotsapi.application.mapper.UsuarioMapper;
 import com.sioma.spotsapi.application.usecase.CreateUsuarioUseCase;
+import com.sioma.spotsapi.application.usecase.DeleteUsuarioByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetFincasByUsuarioIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetUsuarioByIdUseCase;
 import com.sioma.spotsapi.domain.model.Usuario;
@@ -28,6 +29,7 @@ public class UsuarioController {
     private final CreateUsuarioUseCase useCase;
     private final GetUsuarioByIdUseCase getUsuarioByIdUseCase;
     private final GetFincasByUsuarioIdUseCase getFincasByUsuarioIdUseCase;
+    private final DeleteUsuarioByIdUseCase deleteUsuarioByIdUseCase;
     private final UsuarioMapper usuarioMapper;
     private final FincaMapper fincaMapper;
 
@@ -61,4 +63,12 @@ public class UsuarioController {
                 )
         );
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> delete(@PathVariable @Min(1) Long id) {
+        deleteUsuarioByIdUseCase.execute(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

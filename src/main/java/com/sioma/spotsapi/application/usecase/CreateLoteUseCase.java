@@ -9,6 +9,7 @@ import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateLoteUseCase {
@@ -22,17 +23,16 @@ public class CreateLoteUseCase {
         this.plantaRepository = plantaRepository;
     }
 
+    @Transactional
     public Lote execute(String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
 
-        if(!fincaRepository.existsById(fincaId)) {
+        if (fincaRepository.findById(fincaId).isEmpty()) {
             throw new FincaNotFoundException(fincaId);
         }
-
-        if(!plantaRepository.existsById(tipoCultivoId)) {
+        if (plantaRepository.findById(tipoCultivoId).isEmpty()) {
             throw new PlantaNotFoundException(tipoCultivoId);
         }
-
-        if(repository.existsByNombreIgnoreCaseAndFincaId(nombre, fincaId)) {
+        if (repository.existsByNombreIgnoreCaseAndFincaId(nombre, fincaId)) {
             throw new LoteAlreadyExistsException();
         }
 

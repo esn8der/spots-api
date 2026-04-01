@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public interface FincaRepository {
     Finca save(Finca finca);
+    void deleteById(Long id);
     Optional<Finca> findById(Long id);
-    boolean existsById(Long id);
     List<Finca> findAllByUsuarioId(Long id);
     boolean existsByNombreIgnoreCaseAndUsuarioId(String nombre, Long usuarioId);
 }

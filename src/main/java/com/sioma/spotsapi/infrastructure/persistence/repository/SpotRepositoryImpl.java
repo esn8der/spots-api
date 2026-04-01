@@ -1,24 +1,22 @@
 package com.sioma.spotsapi.infrastructure.persistence.repository;
 
+import com.sioma.spotsapi.domain.exception.SpotNotFoundException;
 import com.sioma.spotsapi.domain.model.Spot;
 import com.sioma.spotsapi.domain.repository.SpotRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entities.SpotEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class SpotRepositoryImpl implements SpotRepository {
     private final SpotJpaRepository jpaRepository;
 
     @Override
-    @Transactional
     public Spot save(Spot spot) {
         log.debug("Guardando spot: {}", spot.getCoordenada());
         SpotEntity entity = new SpotEntity(
@@ -31,6 +29,11 @@ public class SpotRepositoryImpl implements SpotRepository {
 
         log.debug("Spot guardado con id: {}", entity.getId());
         return toDomain(entity);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
     }
 
     @Override

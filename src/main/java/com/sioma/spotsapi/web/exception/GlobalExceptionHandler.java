@@ -156,6 +156,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
+    @ExceptionHandler(SpotNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSpotNotExists(SpotNotFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "SPOT_NOT_EXISTS"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
 

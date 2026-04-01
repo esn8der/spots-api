@@ -2,9 +2,11 @@ package com.sioma.spotsapi.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "usuario")
 public class UsuarioEntity {
 
@@ -20,8 +22,6 @@ public class UsuarioEntity {
 
     @Column(name = "password_hash", nullable = false)
     private String password;
-
-    public UsuarioEntity() {}
 
     public UsuarioEntity(String nombre, String email, String password) {
         this.nombre = nombre;

@@ -1,5 +1,7 @@
 package com.sioma.spotsapi.application.usecase;
 
+import com.sioma.spotsapi.domain.model.Finca;
+import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.fixtures.LoteFixtures;
 import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.exception.LoteAlreadyExistsException;
@@ -15,6 +17,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -94,14 +98,14 @@ class CreateLoteUseCaseTest {
                         geocerca,
                         LoteFixtures.FINCA_ID,
                         LoteFixtures.TIPO_CULTIVO_ID)
-                );
+        );
 
         // THEN
         thenLoteIsNotSaved();
     }
 
     @Test
-    void shouldCreateLoteSuccessfully(){
+    void shouldCreateLoteSuccessfully() {
         // GIVEN
         givenFincaExists(true);
         givenPlantaExists(true);
@@ -129,13 +133,17 @@ class CreateLoteUseCaseTest {
     }
 
     private void givenFincaExists(boolean exists) {
-        when(fincaRepository.existsById(LoteFixtures.FINCA_ID))
-                .thenReturn(exists);
+        Optional<Finca> finca = exists ? Optional.of(mock(Finca.class)) : Optional.empty();
+
+        when(fincaRepository.findById(LoteFixtures.FINCA_ID))
+                .thenReturn(finca);
     }
 
     private void givenPlantaExists(boolean exists) {
-        when(plantaRepository.existsById(LoteFixtures.TIPO_CULTIVO_ID))
-                .thenReturn(exists);
+        Optional<Planta> planta = exists ? Optional.of(mock(Planta.class)) : Optional.empty();
+
+        when(plantaRepository.findById(LoteFixtures.TIPO_CULTIVO_ID))
+                .thenReturn(planta);
     }
 
     private void givenLoteExists(boolean exists) {

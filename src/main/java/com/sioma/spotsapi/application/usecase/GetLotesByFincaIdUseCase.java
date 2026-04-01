@@ -19,7 +19,7 @@ public class GetLotesByFincaIdUseCase {
     }
 
     public List<Lote> execute(Long id) {
-        if(!fincaRepository.existsById(id)) {
+        if(fincaRepository.findById(id).isEmpty()) {
             throw new FincaNotFoundException(id);
         }
 

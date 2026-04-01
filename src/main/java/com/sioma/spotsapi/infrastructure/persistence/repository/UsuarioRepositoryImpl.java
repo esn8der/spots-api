@@ -1,25 +1,23 @@
 package com.sioma.spotsapi.infrastructure.persistence.repository;
 
+import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entities.UsuarioEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class UsuarioRepositoryImpl implements UsuarioRepository {
 
     private final UsuarioJpaRepository jpaRepository;
 
     @Override
-    @Transactional
     public Usuario save(Usuario usuario) {
         log.debug("Guardando usuario: {}", usuario.getNombre());
 
@@ -47,9 +45,8 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     }
 
     @Override
-    public boolean existsById(Long id) {
-        log.debug("Buscando usuario con id: {}", id);
-        return jpaRepository.existsById(id);
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
     }
 
     private Usuario toDomain(UsuarioEntity entity) {

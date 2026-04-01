@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.application.usecase;
 
+import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.fixtures.FincaFixtures;
 import com.sioma.spotsapi.domain.exception.FincaAlreadyExistsException;
 import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
@@ -12,6 +13,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -87,8 +90,9 @@ class CreateFincaUseCaseTest {
     }
 
     private void givenUsuarioExists(boolean exists) {
-        when(usuarioRepository.existsById(FincaFixtures.USUARIO_ID))
-                .thenReturn(exists);
+        Optional<Usuario> usuario = exists ? Optional.of(mock(Usuario.class)) : Optional.empty();
+        when(usuarioRepository.findById(FincaFixtures.USUARIO_ID))
+                .thenReturn(usuario);
     }
 
     private void givenFincaExists(boolean exists){

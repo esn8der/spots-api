@@ -2,11 +2,13 @@ package com.sioma.spotsapi.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Polygon;
 
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "lote")
 public class LoteEntity {
     @Id
@@ -27,8 +29,6 @@ public class LoteEntity {
 
     @Column(name = "on_agp")
     private boolean onAgp;
-
-    public LoteEntity() {}
 
     public LoteEntity(String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
         this.nombre = nombre;

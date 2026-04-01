@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PlantaRepository {
+    List<Planta> findAll();
+    void deleteById(Long id);
     Planta save(Planta planta);
     Optional<Planta> findById(Long id);
     boolean existsByNombreIgnoreCase(String nombre);
-    boolean existsById(Long id);
-    List<Planta> findAll();
 }

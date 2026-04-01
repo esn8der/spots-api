@@ -4,6 +4,7 @@ import com.sioma.spotsapi.domain.exception.PlantaAlreadyExistsException;
 import org.springframework.stereotype.Service;
 import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreatePlantaUseCase {
@@ -13,9 +14,10 @@ public class CreatePlantaUseCase {
         this.repository = repository;
     }
 
+    @Transactional
     public Planta execute(String nombre) {
 
-        if(repository.existsByNombreIgnoreCase(nombre)) {
+        if (repository.existsByNombreIgnoreCase(nombre)) {
             throw new PlantaAlreadyExistsException();
         }
 

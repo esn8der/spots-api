@@ -6,6 +6,7 @@ import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateFincaUseCase {
@@ -17,9 +18,10 @@ public class CreateFincaUseCase {
         this.usuarioRepository = usuarioRepository;
     }
 
+    @Transactional
     public Finca execute(String nombre, Long usuarioId) {
 
-        if (!usuarioRepository.existsById(usuarioId)) {
+        if (usuarioRepository.findById(usuarioId).isEmpty()) {
             throw new UsuarioNotFoundException(usuarioId);
         }
         if (fincaRepository.existsByNombreIgnoreCaseAndUsuarioId(nombre, usuarioId)) {

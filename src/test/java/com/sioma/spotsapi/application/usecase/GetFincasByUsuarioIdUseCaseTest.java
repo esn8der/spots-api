@@ -2,6 +2,7 @@ package com.sioma.spotsapi.application.usecase;
 
 import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
+import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
 import com.sioma.spotsapi.fixtures.FincaFixtures;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -31,7 +33,7 @@ class GetFincasByUsuarioIdUseCaseTest {
     @Test
     void shouldThrowExceptionWhenUsuarioDoesNotExist() {
         // GIVEN
-        when(usuarioRepository.existsById(FincaFixtures.USUARIO_ID)).thenReturn(false);
+        givenUsuarioExists(false);
 
         // WHEN + THEN
         assertThrows(UsuarioNotFoundException.class,
@@ -43,9 +45,9 @@ class GetFincasByUsuarioIdUseCaseTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoFincasFound(){
+    void shouldReturnEmptyListWhenNoFincasFound() {
         // GIVEN
-        when(usuarioRepository.existsById(FincaFixtures.USUARIO_ID)).thenReturn(true);
+        givenUsuarioExists(true);
         when(repository.findAllByUsuarioId(FincaFixtures.USUARIO_ID)).thenReturn(List.of());
 
         // WHEN
@@ -58,9 +60,9 @@ class GetFincasByUsuarioIdUseCaseTest {
     }
 
     @Test
-    void shouldReturnFincasWhenFincasFoundForUsuario(){
+    void shouldReturnFincasWhenFincasFoundForUsuario() {
         // GIVEN
-        when(usuarioRepository.existsById(FincaFixtures.USUARIO_ID)).thenReturn(true);
+        givenUsuarioExists(true);
         List<Finca> expectedFincas = List.of(
                 new Finca(
                         FincaFixtures.NOMBRE,
@@ -76,5 +78,11 @@ class GetFincasByUsuarioIdUseCaseTest {
         // THEN
         verify(repository).findAllByUsuarioId(FincaFixtures.USUARIO_ID);
         assertEquals(expectedFincas, result);
+    }
+
+
+    private void givenUsuarioExists(boolean exists) {
+        Optional<Usuario> usuario = exists ? Optional.of(mock(Usuario.class)) : Optional.empty();
+        when(usuarioRepository.findById(FincaFixtures.USUARIO_ID)).thenReturn(usuario);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface LoteRepository {
     Lote save(Lote lote);
+    void deleteById(Long id);
     Optional<Lote> findById(Long id);
     List<Lote> findAllByFincaId(Long fincaId);
     boolean existsByNombreIgnoreCaseAndFincaId(String nombre, Long fincaId);

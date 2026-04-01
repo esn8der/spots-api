@@ -2,9 +2,11 @@ package com.sioma.spotsapi.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "planta")
 public class PlantaEntity {
 
@@ -14,8 +16,6 @@ public class PlantaEntity {
 
     @Column(nullable = false)
     private String nombre;
-
-    public PlantaEntity() {}
 
     public PlantaEntity(String nombre) {
         this.nombre = nombre;

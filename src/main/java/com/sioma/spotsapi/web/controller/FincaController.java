@@ -3,6 +3,7 @@ package com.sioma.spotsapi.web.controller;
 import com.sioma.spotsapi.application.mapper.FincaMapper;
 import com.sioma.spotsapi.application.mapper.LoteMapper;
 import com.sioma.spotsapi.application.usecase.CreateFincaUseCase;
+import com.sioma.spotsapi.application.usecase.DeleteFincaByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetFincaByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetLotesByFincaIdUseCase;
 import com.sioma.spotsapi.domain.model.Finca;
@@ -28,6 +29,7 @@ public class FincaController {
     private final CreateFincaUseCase useCase;
     private final GetLotesByFincaIdUseCase getLotesByFincaIdUseCase;
     private final GetFincaByIdUseCase getFincaByIdUseCase;
+    private final DeleteFincaByIdUseCase deleteFincaByIdUseCase;
     private final FincaMapper fincaMapper;
     private final LoteMapper loteMapper;
 
@@ -57,6 +59,13 @@ public class FincaController {
                         getLotesByFincaIdUseCase.execute(id)
                 )
         );
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> delete(@PathVariable @Min(1) Long id) {
+        deleteFincaByIdUseCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 }
 

@@ -10,6 +10,7 @@ import com.sioma.spotsapi.domain.repository.SpotRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -22,15 +23,15 @@ public class CreateSpotUseCase {
         this.loteRepository = loteRepository;
     }
 
-    public Spot execute(Point coordenada, Long loteId, int linea, int posicion){
+    @Transactional
+    public Spot execute(Point coordenada, Long loteId, int linea, int posicion) {
 
         Lote lote = loteRepository.findById(loteId)
                 .orElseThrow(() -> new LoteNotFoundException(loteId));
 
-        if(spotRepository.existsByLoteIdAndLineaAndPosicion(loteId, linea, posicion)) {
+        if (spotRepository.existsByLoteIdAndLineaAndPosicion(loteId, linea, posicion)) {
             throw new SpotAlreadyExistsException();
         }
-
         if (!lote.getGeocerca().contains(coordenada)) {
             throw new PointOutsideLoteException();
         }

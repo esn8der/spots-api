@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.infrastructure.persistence.repository;
 
+import com.sioma.spotsapi.domain.exception.LoteNotFoundException;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entities.LoteEntity;
@@ -7,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,12 +15,10 @@ import java.util.Optional;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class LoteRepositoryImpl implements LoteRepository {
     private final LoteJpaRepository jpaRepository;
 
     @Override
-    @Transactional
     public Lote save(Lote lote) {
         log.debug("Guardando lote: {}", lote.getNombre());
 
@@ -55,6 +53,11 @@ public class LoteRepositoryImpl implements LoteRepository {
     @Override
     public boolean existsByNombreIgnoreCaseAndFincaId(String nombre, Long fincaId) {
         return jpaRepository.existsByNombreIgnoreCaseAndFincaId(nombre, fincaId);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
     }
 
     private Lote toDomain(LoteEntity entity) {

@@ -2,10 +2,12 @@ package com.sioma.spotsapi.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Point;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "spot")
 public class SpotEntity {
 
@@ -24,8 +26,6 @@ public class SpotEntity {
 
     @Column(nullable = false)
     private int posicion;
-
-    public SpotEntity() {}
 
     public SpotEntity(Point coordenada, Long loteId, int linea, int posicion) {
         this.coordenada = coordenada;

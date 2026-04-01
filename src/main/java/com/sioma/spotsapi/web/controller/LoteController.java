@@ -2,6 +2,7 @@ package com.sioma.spotsapi.web.controller;
 
 import com.sioma.spotsapi.application.mapper.LoteMapper;
 import com.sioma.spotsapi.application.usecase.CreateLoteUseCase;
+import com.sioma.spotsapi.application.usecase.DeleteLoteByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetLoteByIdUseCase;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class LoteController {
     private final CreateLoteUseCase useCase;
     private final GetLoteByIdUseCase getLoteByIdUseCase;
+    private final DeleteLoteByIdUseCase deleteLoteByIdUseCase;
     private final LoteMapper loteMapper;
 
     @PostMapping
@@ -51,5 +53,12 @@ public class LoteController {
                         getLoteByIdUseCase.execute(id)
                 )
         );
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> delete(@PathVariable @Min(1) Long id) {
+        deleteLoteByIdUseCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 }

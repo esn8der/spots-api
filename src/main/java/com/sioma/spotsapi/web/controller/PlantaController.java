@@ -2,6 +2,7 @@ package com.sioma.spotsapi.web.controller;
 
 import com.sioma.spotsapi.application.mapper.PlantaMapper;
 import com.sioma.spotsapi.application.usecase.CreatePlantaUseCase;
+import com.sioma.spotsapi.application.usecase.DeletePlantaByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetPlantaByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetPlantasUseCase;
 import com.sioma.spotsapi.domain.model.Planta;
@@ -26,6 +27,7 @@ public class PlantaController {
     private final CreatePlantaUseCase createPlantaUseCase;
     private final GetPlantasUseCase getPlantasUseCase;
     private final GetPlantaByIdUseCase getPlantaByIdUseCase;
+    private final DeletePlantaByIdUseCase deletePlantaByIdUseCase;
     private final PlantaMapper plantaMapper;
 
     @PostMapping
@@ -56,5 +58,12 @@ public class PlantaController {
                         getPlantasUseCase.execute()
                 )
         );
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> delete(@PathVariable @Min(1) Long id) {
+        deletePlantaByIdUseCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -6,7 +6,6 @@ import com.sioma.spotsapi.infrastructure.persistence.entities.FincaEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +13,11 @@ import java.util.Optional;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class FincaRepositoryImpl implements FincaRepository {
 
     private final FincaJpaRepository jpaRepository;
 
     @Override
-    @Transactional
     public Finca save(Finca finca) {
         log.debug("Guardando finca: {}", finca.getNombre());
 
@@ -44,8 +41,8 @@ public class FincaRepositoryImpl implements FincaRepository {
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return jpaRepository.existsById(id);
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
     }
 
     @Override

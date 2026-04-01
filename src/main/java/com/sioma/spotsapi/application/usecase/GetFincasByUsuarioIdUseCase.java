@@ -19,7 +19,7 @@ public class GetFincasByUsuarioIdUseCase {
     }
 
     public List<Finca> execute(Long id) {
-        if (!usuarioRepository.existsById(id)) {
+        if (usuarioRepository.findById(id).isEmpty()) {
             throw new UsuarioNotFoundException(id);
         }
 

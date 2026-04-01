@@ -2,9 +2,11 @@ package com.sioma.spotsapi.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "finca")
 public class FincaEntity {
 
@@ -17,8 +19,6 @@ public class FincaEntity {
 
     @Column(name = "usuario_id", nullable = false)
     private Long usuarioId;
-
-    public FincaEntity() {}
 
     public FincaEntity(String nombre, Long usuarioId) {
         this.nombre = nombre;
