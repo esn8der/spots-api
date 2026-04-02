@@ -23,7 +23,6 @@ public class DeleteUsuarioByIdUseCase {
         log.debug("Intentando eliminar usuario con id: {}", id);
 
         if (repository.findById(id).isEmpty()) {
-            log.warn("Usuario con id: {} no encontrada para eliminar", id);
             throw new UsuarioNotFoundException(id);
         }
 

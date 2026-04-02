@@ -25,3 +25,4 @@ public class FincaEntity {
         this.usuarioId = usuarioId;
     }
 }
+

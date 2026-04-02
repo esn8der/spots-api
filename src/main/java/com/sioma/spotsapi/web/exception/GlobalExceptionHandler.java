@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PlantaAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handlePlantaExists(PlantaAlreadyExistsException ex) {
-
+        log.warn("Intento de crear planta duplicada, nombre: {}", ex.getNombre());
         HttpStatus status = HttpStatus.CONFLICT;
 
         ErrorResponse error = new ErrorResponse(
@@ -29,6 +29,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsuarioAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUsuarioExists(UsuarioAlreadyExistsException ex) {
+        log.warn("Intento de crear un usuario duplicado, email: {}", ex.getEmail());
 
         HttpStatus status = HttpStatus.CONFLICT;
         ErrorResponse error = new ErrorResponse(
@@ -41,6 +42,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(FincaAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleFincaExists(FincaAlreadyExistsException ex) {
+        log.warn("Intento de crear una finca duplicada, nombre: {} - usuarioId: {}", ex.getNombre(), ex.getUsuarioId());
 
         HttpStatus status = HttpStatus.CONFLICT;
         ErrorResponse error = new ErrorResponse(
@@ -51,8 +53,36 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
+    @ExceptionHandler(LoteAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleLoteExists(LoteAlreadyExistsException ex) {
+        log.warn("Intento de crear un lote duplicado, nombre: {} - fincaId: {}", ex.getNombre(), ex.getFincaId());
+
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "LOTE_ALREADY_EXISTS"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(SpotAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleSpotExists(SpotAlreadyExistsException ex) {
+        log.warn("Intento de crear un Spot duplicado, linea: {} - posición: {} - loteId: {}",
+                ex.getLinea(), ex.getPosicion(), ex.getLoteId());
+
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "SPOT_ALREADY_EXISTS"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
     @ExceptionHandler(UsuarioNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsuarioNotExists(UsuarioNotFoundException ex) {
+        log.warn("No existe el usuario con el id: {}", ex.getId());
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
@@ -65,6 +95,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(FincaNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleFincaNotExists(FincaNotFoundException ex) {
+        log.warn("No existe la finca con el id: {}", ex.getId());
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
@@ -77,6 +108,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PlantaNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlePlantaNotExists(PlantaNotFoundException ex) {
+        log.warn("No existe la planta con el id: {}", ex.getId());
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
@@ -87,33 +119,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(LoteAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleLoteExists(LoteAlreadyExistsException ex) {
-
-        HttpStatus status = HttpStatus.CONFLICT;
-        ErrorResponse error = new ErrorResponse(
-                status.value(),
-                ex.getMessage(),
-                "LOTE_ALREADY_EXISTS"
-        );
-        return ResponseEntity.status(status).body(error);
-    }
-
-    @ExceptionHandler(InvalidGeoSpatialException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidGeocerca(InvalidGeoSpatialException ex) {
-
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-
-        ErrorResponse error = new ErrorResponse(
-                status.value(),
-                ex.getMessage(),
-                "INVALID_GEOCERCA"
-        );
-        return ResponseEntity.status(status).body(error);
-    }
-
     @ExceptionHandler(LoteNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleLoteNotExists(LoteNotFoundException ex) {
+        log.warn("No existe el lote con el id: {}", ex.getId());
+
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
                 status.value(),
@@ -123,19 +132,37 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(SpotAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleSpotExists(SpotAlreadyExistsException ex) {
-        HttpStatus status = HttpStatus.CONFLICT;
+    @ExceptionHandler(SpotNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSpotNotExists(SpotNotFoundException ex) {
+        log.warn("No existe el spot con el id: {}", ex.getId());
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse error = new ErrorResponse(
                 status.value(),
                 ex.getMessage(),
-                "SPOT_ALREADY_EXISTS"
+                "SPOT_NOT_EXISTS"
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(InvalidGeoSpatialException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidGeocerca(InvalidGeoSpatialException ex) {
+        log.warn("Error geospatial: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                "GEOSPATIAL_ERROR"
         );
         return ResponseEntity.status(status).body(error);
     }
 
     @ExceptionHandler(PointOutsideLoteException.class)
     public ResponseEntity<ErrorResponse> handlePointOutsideLote(PointOutsideLoteException ex) {
+        log.warn("Punto fuera del lote: {}", ex.getMessage());
+
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorResponse error = new ErrorResponse(
                 status.value(),
@@ -156,21 +183,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(SpotNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleSpotNotExists(SpotNotFoundException ex) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        ErrorResponse error = new ErrorResponse(
-                status.value(),
-                ex.getMessage(),
-                "SPOT_NOT_EXISTS"
-        );
-        return ResponseEntity.status(status).body(error);
-    }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
-
         String message = ex.getMostSpecificCause().getMessage();
+
+        log.warn("Error de integridad de datos: {}", message);
 
         if (message != null && message.contains("idx_spot_lote_geo_unique")) {
 
@@ -194,6 +211,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        log.warn("Error de validación de datos");
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 

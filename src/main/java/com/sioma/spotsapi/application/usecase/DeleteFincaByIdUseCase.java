@@ -16,14 +16,13 @@ public class DeleteFincaByIdUseCase {
     @Transactional
     public void execute(Long id) {
         if (id == null || id <= 0) {
-            log.error("ID de finca inválido para eliminación: {}", id);
+            log.warn("ID de finca inválido para eliminación: {}", id);
             throw new IllegalArgumentException("ID de finca inválido: " + id);
         }
 
         log.debug("Intentando eliminar finca con id: {}", id);
 
         if (repository.findById(id).isEmpty()) {
-            log.warn("Finca con id: {} no encontrada para eliminar", id);
             throw new FincaNotFoundException(id);
         }
 

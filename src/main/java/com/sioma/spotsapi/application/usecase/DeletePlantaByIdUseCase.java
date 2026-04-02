@@ -23,7 +23,6 @@ public class DeletePlantaByIdUseCase {
         log.debug("Intentando eliminar planta con id: {}", id);
 
         if (repository.findById(id).isEmpty()) {
-            log.warn("Planta con id: {} no encontrada para eliminar", id);
             throw new PlantaNotFoundException(id);
         }
 

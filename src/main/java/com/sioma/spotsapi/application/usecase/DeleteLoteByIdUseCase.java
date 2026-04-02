@@ -23,7 +23,6 @@ public class DeleteLoteByIdUseCase {
         log.debug("Intentando eliminar Lote con id: {}", id);
 
         if (repository.findById(id).isEmpty()) {
-            log.warn("Lote con id: {} no encontrado para eliminar", id);
             throw new LoteNotFoundException(id);
         }
 
