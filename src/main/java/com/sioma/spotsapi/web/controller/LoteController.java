@@ -5,13 +5,11 @@ import com.sioma.spotsapi.application.usecase.CreateLoteUseCase;
 import com.sioma.spotsapi.application.usecase.DeleteLoteByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetLoteByIdUseCase;
 import com.sioma.spotsapi.domain.model.Lote;
-import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
 import com.sioma.spotsapi.web.dto.CreateLoteRequest;
 import com.sioma.spotsapi.web.dto.LoteResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.Polygon;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +28,9 @@ public class LoteController {
 
     @PostMapping
     public ResponseEntity<LoteResponse> create(@Valid @RequestBody CreateLoteRequest request) {
-        Polygon polygon = GeometryFactoryProvider
-                .fromGeoJson(request.geocerca());
-
         Lote lote = useCase.execute(
                 request.nombre(),
-                polygon,
+                request.geocerca().coordinates().getFirst(), // List<List<Double>>
                 request.fincaId(),
                 request.tipoCultivoId()
         );

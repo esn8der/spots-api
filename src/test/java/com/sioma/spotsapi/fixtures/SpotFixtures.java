@@ -1,9 +1,9 @@
 package com.sioma.spotsapi.fixtures;
 
 import org.locationtech.jts.geom.*;
+import java.util.List;
 
 public class SpotFixtures {
-
     private static final GeometryFactory geometryFactory =
             new GeometryFactory(new PrecisionModel(), 4326);
 
@@ -17,5 +17,9 @@ public class SpotFixtures {
 
     public static Point validPoint() {
         return geometryFactory.createPoint(new Coordinate(-73.647243, 3.896533));
+    }
+
+    public static List<Double> validCoordinates() {
+        return List.of(-73.647243, 3.896533);
     }
 }

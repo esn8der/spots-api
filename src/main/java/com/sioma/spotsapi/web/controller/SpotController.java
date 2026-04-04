@@ -5,13 +5,11 @@ import com.sioma.spotsapi.application.usecase.CreateSpotUseCase;
 import com.sioma.spotsapi.application.usecase.DeleteSpotByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetSpotByIdUseCase;
 import com.sioma.spotsapi.domain.model.Spot;
-import com.sioma.spotsapi.infrastructure.geospatial.GeometryFactoryProvider;
 import com.sioma.spotsapi.web.dto.CreateSpotRequest;
 import com.sioma.spotsapi.web.dto.SpotResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.Point;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +28,8 @@ public class SpotController {
 
     @PostMapping
     public ResponseEntity<SpotResponse> create(@Valid @RequestBody CreateSpotRequest request) {
-        Point point = GeometryFactoryProvider.fromGeoJsonPoint(request.coordenada());
-
         Spot spot = useCase.execute(
-                point,
+                request.coordenada().coordinates(), // List<Double>
                 request.loteId(),
                 request.linea(),
                 request.posicion()

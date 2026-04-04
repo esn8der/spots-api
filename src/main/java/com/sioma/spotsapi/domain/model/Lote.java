@@ -1,17 +1,19 @@
 package com.sioma.spotsapi.domain.model;
 
-import org.locationtech.jts.geom.Geometry;
+import com.sioma.spotsapi.domain.exception.PointOutsideLoteException;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 public class Lote {
 
     private Long id;
     private final String nombre;
-    private final Geometry geocerca;
+    private final Polygon geocerca;
     private final Long fincaId;
     private final Long tipoCultivoId;
-    private final boolean onAgp;
+    private boolean onAgp;
 
-    public Lote(Long id, String nombre, Geometry geocerca, Long fincaId, Long tipoCultivoId) {
+    public Lote(Long id, String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
         this.id = id;
         this.nombre = nombre;
         this.geocerca = geocerca;
@@ -20,12 +22,22 @@ public class Lote {
         this.onAgp = false;
     }
 
-    public Lote(String nombre, Geometry geocerca, Long fincaId, Long tipoCultivoId) {
+    public Lote(String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
         this.nombre = nombre;
         this.geocerca = geocerca;
         this.fincaId = fincaId;
         this.tipoCultivoId = tipoCultivoId;
         this.onAgp = false;
+    }
+
+    public Spot crearSpot(Point coordenada, SpotPosition posicion) {
+        if (!this.geocerca.contains(coordenada))
+            throw new PointOutsideLoteException();
+        return new Spot(coordenada, this.id, posicion);
+    }
+
+    public void marcarComoEnAgp() {
+        this.onAgp = true;
     }
 
     public Long getId() {
@@ -36,7 +48,7 @@ public class Lote {
         return nombre;
     }
 
-    public Geometry getGeocerca() {
+    public Polygon getGeocerca() {
         return geocerca;
     }
 

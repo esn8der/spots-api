@@ -6,7 +6,6 @@ import com.sioma.spotsapi.infrastructure.config.PostgresContainerConfig;
 import com.sioma.spotsapi.infrastructure.persistence.entities.*;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
@@ -105,7 +104,7 @@ class SpotJpaRepositoryTest {
         return loteJpaRepository.save(
                 new LoteEntity(
                         lotePolygon.getNombre(),
-                        (Polygon) lotePolygon.getGeocerca(),
+                        lotePolygon.getGeocerca(),
                         finca.getId(),
                         planta.getId()
                 )
