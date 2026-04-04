@@ -1,7 +1,7 @@
 package com.sioma.spotsapi.web.controller;
 
-import com.sioma.spotsapi.application.mapper.FincaMapper;
-import com.sioma.spotsapi.application.mapper.LoteMapper;
+import com.sioma.spotsapi.web.mapper.FincaResponseMapper;
+import com.sioma.spotsapi.web.mapper.LoteResponseMapper;
 import com.sioma.spotsapi.application.usecase.CreateFincaUseCase;
 import com.sioma.spotsapi.application.usecase.DeleteFincaByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetFincaByIdUseCase;
@@ -30,8 +30,8 @@ public class FincaController {
     private final GetLotesByFincaIdUseCase getLotesByFincaIdUseCase;
     private final GetFincaByIdUseCase getFincaByIdUseCase;
     private final DeleteFincaByIdUseCase deleteFincaByIdUseCase;
-    private final FincaMapper fincaMapper;
-    private final LoteMapper loteMapper;
+    private final FincaResponseMapper fincaResponseMapper;
+    private final LoteResponseMapper loteResponseMapper;
 
     @PostMapping
     public ResponseEntity<FincaResponse> create(@Valid @RequestBody CreateFincaRequest request) {
@@ -40,13 +40,13 @@ public class FincaController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .header(HttpHeaders.LOCATION, "/fincas/" + finca.getId())
-                .body(fincaMapper.toResponse(finca));
+                .body(fincaResponseMapper.toResponse(finca));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FincaResponse> getById(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(
-                fincaMapper.toResponse(
+                fincaResponseMapper.toResponse(
                         getFincaByIdUseCase.execute(id)
                 )
         );
@@ -55,7 +55,7 @@ public class FincaController {
     @GetMapping("/{id}/lotes")
     public ResponseEntity<List<LoteResponse>> getLotesByFinca(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(
-                loteMapper.toResponseList(
+                loteResponseMapper.toResponseList(
                         getLotesByFincaIdUseCase.execute(id)
                 )
         );

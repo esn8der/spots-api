@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.web.controller;
 
-import com.sioma.spotsapi.application.mapper.LoteMapper;
+import com.sioma.spotsapi.web.mapper.LoteResponseMapper;
 import com.sioma.spotsapi.application.usecase.CreateLoteUseCase;
 import com.sioma.spotsapi.application.usecase.DeleteLoteByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetLoteByIdUseCase;
@@ -26,7 +26,7 @@ public class LoteController {
     private final CreateLoteUseCase useCase;
     private final GetLoteByIdUseCase getLoteByIdUseCase;
     private final DeleteLoteByIdUseCase deleteLoteByIdUseCase;
-    private final LoteMapper loteMapper;
+    private final LoteResponseMapper loteResponseMapper;
 
     @PostMapping
     public ResponseEntity<LoteResponse> create(@Valid @RequestBody CreateLoteRequest request) {
@@ -43,13 +43,13 @@ public class LoteController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .header(HttpHeaders.LOCATION, "/lotes/" + lote.getId())
-                .body(loteMapper.toResponse(lote));
+                .body(loteResponseMapper.toResponse(lote));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<LoteResponse> getById(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(
-                loteMapper.toResponse(
+                loteResponseMapper.toResponse(
                         getLoteByIdUseCase.execute(id)
                 )
         );

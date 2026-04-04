@@ -1,7 +1,7 @@
 package com.sioma.spotsapi.web.controller;
 
-import com.sioma.spotsapi.application.mapper.FincaMapper;
-import com.sioma.spotsapi.application.mapper.UsuarioMapper;
+import com.sioma.spotsapi.web.mapper.FincaResponseMapper;
+import com.sioma.spotsapi.web.mapper.UsuarioResponseMapper;
 import com.sioma.spotsapi.application.usecase.CreateUsuarioUseCase;
 import com.sioma.spotsapi.application.usecase.DeleteUsuarioByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetFincasByUsuarioIdUseCase;
@@ -30,8 +30,8 @@ public class UsuarioController {
     private final GetUsuarioByIdUseCase getUsuarioByIdUseCase;
     private final GetFincasByUsuarioIdUseCase getFincasByUsuarioIdUseCase;
     private final DeleteUsuarioByIdUseCase deleteUsuarioByIdUseCase;
-    private final UsuarioMapper usuarioMapper;
-    private final FincaMapper fincaMapper;
+    private final UsuarioResponseMapper usuarioResponseMapper;
+    private final FincaResponseMapper fincaResponseMapper;
 
     @PostMapping
     public ResponseEntity<UsuarioResponse> create(@Valid @RequestBody CreateUsuarioRequest request) {
@@ -43,13 +43,13 @@ public class UsuarioController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .header(HttpHeaders.LOCATION, "/usuarios/" + usuario.getNombre())
-                .body(usuarioMapper.toResponse(usuario));
+                .body(usuarioResponseMapper.toResponse(usuario));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponse> getById(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(
-                usuarioMapper.toResponse(
+                usuarioResponseMapper.toResponse(
                         getUsuarioByIdUseCase.execute(id)
                 )
         );
@@ -58,7 +58,7 @@ public class UsuarioController {
     @GetMapping("/{id}/fincas")
     public ResponseEntity<List<FincaResponse>> getFincasByUsuario(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(
-                fincaMapper.toResponseList(
+                fincaResponseMapper.toResponseList(
                         getFincasByUsuarioIdUseCase.execute(id)
                 )
         );

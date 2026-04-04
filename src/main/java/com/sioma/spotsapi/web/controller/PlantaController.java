@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.web.controller;
 
-import com.sioma.spotsapi.application.mapper.PlantaMapper;
+import com.sioma.spotsapi.web.mapper.PlantaResponseMapper;
 import com.sioma.spotsapi.application.usecase.CreatePlantaUseCase;
 import com.sioma.spotsapi.application.usecase.DeletePlantaByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetPlantaByIdUseCase;
@@ -28,7 +28,7 @@ public class PlantaController {
     private final GetPlantasUseCase getPlantasUseCase;
     private final GetPlantaByIdUseCase getPlantaByIdUseCase;
     private final DeletePlantaByIdUseCase deletePlantaByIdUseCase;
-    private final PlantaMapper plantaMapper;
+    private final PlantaResponseMapper plantaResponseMapper;
 
     @PostMapping
     public ResponseEntity<PlantaResponse> create(@Valid @RequestBody CreatePlantaRequest request) {
@@ -38,14 +38,14 @@ public class PlantaController {
                 .status(HttpStatus.CREATED)
                 .header(HttpHeaders.LOCATION, "/plantas/" + planta.getNombre())
                 .body(
-                        plantaMapper.toResponse(planta)
+                        plantaResponseMapper.toResponse(planta)
                 );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlantaResponse> getById(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(
-                plantaMapper.toResponse(
+                plantaResponseMapper.toResponse(
                         getPlantaByIdUseCase.execute(id)
                 )
         );
@@ -54,7 +54,7 @@ public class PlantaController {
     @GetMapping
     public ResponseEntity<List<PlantaResponse>> getAll() {
         return ResponseEntity.ok(
-                plantaMapper.toResponseList(
+                plantaResponseMapper.toResponseList(
                         getPlantasUseCase.execute()
                 )
         );

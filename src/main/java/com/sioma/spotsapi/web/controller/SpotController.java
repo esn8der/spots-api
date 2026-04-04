@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.web.controller;
 
-import com.sioma.spotsapi.application.mapper.SpotMapper;
+import com.sioma.spotsapi.web.mapper.SpotResponseMapper;
 import com.sioma.spotsapi.application.usecase.CreateSpotUseCase;
 import com.sioma.spotsapi.application.usecase.DeleteSpotByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetSpotByIdUseCase;
@@ -26,7 +26,7 @@ public class SpotController {
     private final CreateSpotUseCase useCase;
     private final GetSpotByIdUseCase getSpotByIdUseCase;
     private final DeleteSpotByIdUseCase deleteSpotByIdUseCase;
-    private final SpotMapper spotMapper;
+    private final SpotResponseMapper spotResponseMapper;
 
     @PostMapping
     public ResponseEntity<SpotResponse> create(@Valid @RequestBody CreateSpotRequest request) {
@@ -42,13 +42,13 @@ public class SpotController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .header(HttpHeaders.LOCATION, "/spots/" + spot.getId())
-                .body(spotMapper.toResponse(spot));
+                .body(spotResponseMapper.toResponse(spot));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SpotResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(
-                spotMapper.toResponse(
+                spotResponseMapper.toResponse(
                         getSpotByIdUseCase.execute(id)
                 )
         );

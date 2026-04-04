@@ -3,6 +3,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entities.PlantaEntity;
+import com.sioma.spotsapi.infrastructure.persistence.mapper.PlantaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -12,21 +13,19 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class PlantaRepositoryImpl implements PlantaRepository {
-
     private final PlantaJpaRepository jpaRepository;
+    private final PlantaEntityMapper mapper;
 
     @Override
     public Planta save(Planta planta) {
-        PlantaEntity entity = new PlantaEntity(planta.getNombre());
-        entity = jpaRepository.save(entity);
-
-        return toDomain(entity);
+        PlantaEntity entity = mapper.toEntity(planta);
+        return mapper.toDomain(jpaRepository.save(entity));
     }
 
     @Override
     public Optional<Planta> findById(Long id) {
         return jpaRepository.findById(id)
-                .map(this::toDomain);
+                .map(mapper::toDomain);
     }
 
     @Override
@@ -38,16 +37,12 @@ public class PlantaRepositoryImpl implements PlantaRepository {
     public List<Planta> findAll() {
         return jpaRepository.findAll()
                 .stream()
-                .map(this::toDomain)
+                .map(mapper::toDomain)
                 .toList();
     }
 
     @Override
     public void deleteById(Long id) {
         jpaRepository.deleteById(id);
-    }
-
-    private Planta toDomain(PlantaEntity entity) {
-        return new Planta(entity.getId(), entity.getNombre());
     }
 }

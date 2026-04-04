@@ -1,4 +1,4 @@
-package com.sioma.spotsapi.application.mapper;
+package com.sioma.spotsapi.web.mapper;
 
 import com.sioma.spotsapi.domain.model.Spot;
 import com.sioma.spotsapi.web.dto.SpotResponse;
@@ -8,7 +8,7 @@ import org.mapstruct.MappingConstants;
 import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface SpotMapper {
+public interface SpotResponseMapper {
     SpotResponse toResponse(Spot spot);
     List<SpotResponse> toResponseList(List<Spot> spots);
 }

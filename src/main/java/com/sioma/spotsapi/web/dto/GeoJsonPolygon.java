@@ -8,8 +8,7 @@ import java.util.List;
 
 public record GeoJsonPolygon(
         @NotBlank String type,
-        @NotNull
-        @Size(min = 4, message = "El polígono deben tener mínimo 4 puntos")
+        @NotNull @Size(min = 4, message = "El polígono deben tener mínimo 4 puntos")
         List<List<List<Double>>> coordinates
 ) {
 }
