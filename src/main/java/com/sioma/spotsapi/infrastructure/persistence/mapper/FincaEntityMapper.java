@@ -1,7 +1,7 @@
 package com.sioma.spotsapi.infrastructure.persistence.mapper;
 
 import com.sioma.spotsapi.domain.model.Finca;
-import com.sioma.spotsapi.infrastructure.persistence.entities.FincaEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entity.FincaEntity;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 

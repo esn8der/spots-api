@@ -1,6 +1,6 @@
 package com.sioma.spotsapi.infrastructure.geospatial;
 
-import com.sioma.spotsapi.domain.exception.InvalidGeoSpatialException;
+import com.sioma.spotsapi.infrastructure.geospatial.exception.InvalidGeoSpatialException;
 import com.sioma.spotsapi.domain.ports.out.GeospatialConverter;
 import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Component;

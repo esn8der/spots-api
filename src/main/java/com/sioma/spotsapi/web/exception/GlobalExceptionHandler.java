@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.web.exception;
 
+import com.sioma.spotsapi.infrastructure.geospatial.exception.InvalidGeoSpatialException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;

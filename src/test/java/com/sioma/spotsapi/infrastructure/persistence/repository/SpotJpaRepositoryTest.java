@@ -3,7 +3,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.fixtures.*;
 import com.sioma.spotsapi.infrastructure.config.PostgresContainerConfig;
-import com.sioma.spotsapi.infrastructure.persistence.entities.*;
+import com.sioma.spotsapi.infrastructure.persistence.entity.*;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;

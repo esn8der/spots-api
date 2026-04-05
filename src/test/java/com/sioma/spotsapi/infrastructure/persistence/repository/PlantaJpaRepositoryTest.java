@@ -2,7 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.fixtures.PlantaFixtures;
 import com.sioma.spotsapi.infrastructure.config.PostgresContainerConfig;
-import com.sioma.spotsapi.infrastructure.persistence.entities.PlantaEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entity.PlantaEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;

@@ -1,7 +1,7 @@
 package com.sioma.spotsapi.infrastructure.persistence.mapper;
 
 import com.sioma.spotsapi.domain.model.Planta;
-import com.sioma.spotsapi.infrastructure.persistence.entities.PlantaEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entity.PlantaEntity;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 

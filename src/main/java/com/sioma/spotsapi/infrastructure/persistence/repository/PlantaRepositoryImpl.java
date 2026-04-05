@@ -2,7 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
-import com.sioma.spotsapi.infrastructure.persistence.entities.PlantaEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entity.PlantaEntity;
 import com.sioma.spotsapi.infrastructure.persistence.mapper.PlantaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

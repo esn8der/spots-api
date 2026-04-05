@@ -1,7 +1,7 @@
 package com.sioma.spotsapi.infrastructure.persistence.mapper;
 
 import com.sioma.spotsapi.domain.model.Lote;
-import com.sioma.spotsapi.infrastructure.persistence.entities.LoteEntity;
+import com.sioma.spotsapi.infrastructure.persistence.entity.LoteEntity;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
