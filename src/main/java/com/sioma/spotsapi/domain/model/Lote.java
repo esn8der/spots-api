@@ -23,11 +23,7 @@ public class Lote {
     }
 
     public Lote(String nombre, Polygon geocerca, Long fincaId, Long tipoCultivoId) {
-        this.nombre = nombre;
-        this.geocerca = geocerca;
-        this.fincaId = fincaId;
-        this.tipoCultivoId = tipoCultivoId;
-        this.onAgp = false;
+        this(null, nombre, geocerca, fincaId, tipoCultivoId);
     }
 
     public Spot crearSpot(Point coordenada, SpotPosition posicion) {

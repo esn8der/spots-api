@@ -12,8 +12,7 @@ public class Finca {
     }
 
     public Finca(String nombre, Long usuarioId) {
-        this.nombre = nombre;
-        this.usuarioId = usuarioId;
+        this(null, nombre, usuarioId);
     }
 
     public Long getId() {

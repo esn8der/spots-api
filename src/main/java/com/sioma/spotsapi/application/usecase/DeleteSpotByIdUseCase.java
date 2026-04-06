@@ -22,9 +22,8 @@ public class DeleteSpotByIdUseCase {
 
         log.debug("Intentando eliminar spot con id: {}", id);
 
-        if (repository.findById(id).isEmpty()) {
-            throw new SpotNotFoundException(id);
-        }
+        repository.findById(id)
+                .orElseThrow(() -> new SpotNotFoundException(id));
 
         repository.deleteById(id);
         log.info("Spot con id: {} eliminada exitosamente", id);

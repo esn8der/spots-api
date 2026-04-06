@@ -1,9 +1,9 @@
 package com.sioma.spotsapi.application.usecase;
 
 import com.sioma.spotsapi.domain.exception.UsuarioAlreadyExistsException;
+import com.sioma.spotsapi.domain.ports.out.PasswordHasher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreateUsuarioUseCase {
     private final UsuarioRepository repository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordHasher passwordHasher;
 
     @Transactional
     public Usuario execute(String nombre, String email, String password) {
@@ -24,7 +24,7 @@ public class CreateUsuarioUseCase {
             throw new UsuarioAlreadyExistsException(email);
         }
 
-        String passwordHash = passwordEncoder.encode(password);
+        String passwordHash = passwordHasher.hash(password);
         Usuario usuario = new Usuario(nombre, email, passwordHash);
 
         log.info("Usuario creado exitosamente con nombre: {}", nombre);

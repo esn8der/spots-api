@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.application.usecase;
 
+import com.sioma.spotsapi.domain.ports.out.PasswordHasher;
 import com.sioma.spotsapi.fixtures.UsuarioFixtures;
 import com.sioma.spotsapi.domain.exception.UsuarioAlreadyExistsException;
 import com.sioma.spotsapi.domain.model.Usuario;
@@ -10,7 +11,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.mockito.Mockito.*;
 
@@ -24,7 +24,7 @@ class CreateUsuarioUseCaseTest {
     UsuarioRepository repository;
 
     @Mock
-    PasswordEncoder passwordEncoder;
+    PasswordHasher passwordHasher;
 
     @InjectMocks
     CreateUsuarioUseCase useCase;
@@ -46,7 +46,7 @@ class CreateUsuarioUseCaseTest {
         );
 
         // THEN
-        verify(passwordEncoder, never()).encode(any());
+        verify(passwordHasher, never()).hash(any());
         verify(repository, never()).save(any());
     }
 
@@ -55,7 +55,7 @@ class CreateUsuarioUseCaseTest {
 
         // GIVEN
         givenUsuarioExists(false);
-        when(passwordEncoder.encode(UsuarioFixtures.PASSWORD))
+        when(passwordHasher.hash(UsuarioFixtures.PASSWORD))
                 .thenReturn(UsuarioFixtures.PASSWORD_HASHED);
 
         // WHEN
@@ -68,7 +68,7 @@ class CreateUsuarioUseCaseTest {
         // THEN
         ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
         verify(repository).save(usuarioCaptor.capture());
-        verify(passwordEncoder).encode(UsuarioFixtures.PASSWORD);
+        verify(passwordHasher).hash(UsuarioFixtures.PASSWORD);
 
         Usuario savedUsuario = usuarioCaptor.getValue();
 

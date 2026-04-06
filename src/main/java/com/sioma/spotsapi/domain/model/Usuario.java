@@ -14,9 +14,7 @@ public class Usuario {
     }
 
     public Usuario(String nombre, String email, String password) {
-        this.nombre = nombre;
-        this.email = email;
-        this.password = password;
+        this(null, nombre, email, password);
     }
 
     public Long getId() {

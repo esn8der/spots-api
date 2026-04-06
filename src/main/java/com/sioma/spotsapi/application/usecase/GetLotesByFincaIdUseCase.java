@@ -18,9 +18,8 @@ public class GetLotesByFincaIdUseCase {
     private final FincaRepository fincaRepository;
 
     public List<Lote> execute(Long id) {
-        if(fincaRepository.findById(id).isEmpty()) {
-            throw new FincaNotFoundException(id);
-        }
+        fincaRepository.findById(id)
+                .orElseThrow(() -> new FincaNotFoundException(id));
 
         log.debug("Buscando lotes de la finca con id: {}", id);
         return repository.findAllByFincaId(id);

@@ -18,9 +18,8 @@ public class GetFincasByUsuarioIdUseCase {
     private final UsuarioRepository usuarioRepository;
 
     public List<Finca> execute(Long id) {
-        if (usuarioRepository.findById(id).isEmpty()) {
-            throw new UsuarioNotFoundException(id);
-        }
+        usuarioRepository.findById(id)
+                .orElseThrow(() -> new UsuarioNotFoundException(id));
 
         log.debug("Buscando fincas del usuario con id: {}", id);
         return repository.findAllByUsuarioId(id);

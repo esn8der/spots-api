@@ -20,9 +20,10 @@ public class CreateFincaUseCase {
     @Transactional
     public Finca execute(String nombre, Long usuarioId) {
         log.debug("Creando finca con nombre: {}, usuarioId: {}", nombre, usuarioId);
-        if (usuarioRepository.findById(usuarioId).isEmpty()) {
-            throw new UsuarioNotFoundException(usuarioId);
-        }
+
+        usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
+
         if (fincaRepository.existsByNombreIgnoreCaseAndUsuarioId(nombre, usuarioId)) {
             throw new FincaAlreadyExistsException(nombre, usuarioId);
         }

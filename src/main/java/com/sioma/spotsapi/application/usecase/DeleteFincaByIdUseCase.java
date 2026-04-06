@@ -22,9 +22,8 @@ public class DeleteFincaByIdUseCase {
 
         log.debug("Intentando eliminar finca con id: {}", id);
 
-        if (repository.findById(id).isEmpty()) {
-            throw new FincaNotFoundException(id);
-        }
+        repository.findById(id)
+                .orElseThrow(() -> new FincaNotFoundException(id));
 
         repository.deleteById(id);
         log.info("Finca con id: {} eliminada exitosamente", id);

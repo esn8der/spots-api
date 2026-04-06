@@ -2,6 +2,7 @@ package com.sioma.spotsapi.infrastructure.geospatial;
 
 import com.sioma.spotsapi.infrastructure.geospatial.exception.InvalidGeoSpatialException;
 import com.sioma.spotsapi.domain.ports.out.GeospatialConverter;
+import org.jspecify.annotations.NonNull;
 import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,7 @@ public class GeometryFactoryProvider implements GeospatialConverter {
     }
 
     @Override
-    public Point toPoint(List<Double> coordinates) {
+    public Point toPoint(@NonNull List<Double> coordinates) {
         if (coordinates.size() != 2)
             throw new InvalidGeoSpatialException("Un punto debe tener 2 coordenadas");
         return geometryFactory.createPoint(

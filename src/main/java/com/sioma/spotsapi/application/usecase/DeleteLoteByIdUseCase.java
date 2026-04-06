@@ -22,9 +22,8 @@ public class DeleteLoteByIdUseCase {
 
         log.debug("Intentando eliminar Lote con id: {}", id);
 
-        if (repository.findById(id).isEmpty()) {
-            throw new LoteNotFoundException(id);
-        }
+        repository.findById(id)
+                        .orElseThrow(() -> new LoteNotFoundException(id));
 
         repository.deleteById(id);
         log.info("Lote con id: {} eliminado exitosamente", id);

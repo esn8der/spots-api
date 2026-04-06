@@ -11,7 +11,7 @@ public class Planta {
     }
 
     public Planta(String nombre) {
-        this.nombre = nombre;
+        this(null, nombre);
     }
 
     public Long getId() {

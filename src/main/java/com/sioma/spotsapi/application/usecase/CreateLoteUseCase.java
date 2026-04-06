@@ -34,9 +34,10 @@ public class CreateLoteUseCase {
         if (fincaRepository.findById(fincaId).isEmpty()) {
             throw new FincaNotFoundException(fincaId);
         }
-        if (plantaRepository.findById(tipoCultivoId).isEmpty()) {
-            throw new PlantaNotFoundException(tipoCultivoId);
-        }
+
+        plantaRepository.findById(tipoCultivoId)
+                .orElseThrow(() -> new PlantaNotFoundException(tipoCultivoId));
+
         if (repository.existsByNombreIgnoreCaseAndFincaId(nombre, fincaId)) {
             throw new LoteAlreadyExistsException(nombre, fincaId);
         }
