@@ -3,6 +3,8 @@ package com.sioma.spotsapi.fixtures;
 import com.sioma.spotsapi.domain.model.Lote;
 import org.locationtech.jts.geom.*;
 
+import java.util.UUID;
+
 public class LoteFixtures {
     public static final Long ID = 1L;
     public static final String NOMBRE = "Lote 1";
@@ -75,6 +77,10 @@ public class LoteFixtures {
                 1L,
                 1L
         );
+    }
+
+    public static String uniqueName() {
+        return NOMBRE + "-" + UUID.randomUUID().toString().substring(0, 6);
     }
 
     public static Lote anyLote() {
