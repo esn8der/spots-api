@@ -15,11 +15,6 @@ public class DeleteUsuarioByIdUseCase {
 
     @Transactional
     public void execute(Long id) {
-        if (id == null || id <= 0) {
-            log.error("ID de usuario inválido para eliminación: {}", id);
-            throw new IllegalArgumentException("ID de usuario inválido: " + id);
-        }
-
         log.debug("Intentando eliminar usuario con id: {}", id);
 
         repository.findById(id)

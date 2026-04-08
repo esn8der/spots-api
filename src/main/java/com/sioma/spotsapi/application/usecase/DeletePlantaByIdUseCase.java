@@ -15,11 +15,6 @@ public class DeletePlantaByIdUseCase {
 
     @Transactional
     public void execute(Long id) {
-        if (id == null || id <= 0) {
-            log.error("ID de planta inválido para eliminación: {}", id);
-            throw new IllegalArgumentException("ID de planta inválido: " + id);
-        }
-
         log.debug("Intentando eliminar planta con id: {}", id);
 
         repository.findById(id)

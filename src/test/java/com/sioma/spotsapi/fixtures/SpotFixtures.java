@@ -1,6 +1,7 @@
 package com.sioma.spotsapi.fixtures;
 
 import org.locationtech.jts.geom.*;
+
 import java.util.List;
 
 public class SpotFixtures {

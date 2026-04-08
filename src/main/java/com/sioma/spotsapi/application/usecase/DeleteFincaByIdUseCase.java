@@ -15,11 +15,6 @@ public class DeleteFincaByIdUseCase {
 
     @Transactional
     public void execute(Long id) {
-        if (id == null || id <= 0) {
-            log.warn("ID de finca inválido para eliminación: {}", id);
-            throw new IllegalArgumentException("ID de finca inválido: " + id);
-        }
-
         log.debug("Intentando eliminar finca con id: {}", id);
 
         repository.findById(id)

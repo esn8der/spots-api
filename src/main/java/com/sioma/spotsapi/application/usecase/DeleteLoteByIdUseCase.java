@@ -15,15 +15,10 @@ public class DeleteLoteByIdUseCase {
 
     @Transactional
     public void execute(Long id) {
-        if (id == null || id <= 0) {
-            log.error("ID de Lote inválido para eliminación: {}", id);
-            throw new IllegalArgumentException("ID de lote inválido: " + id);
-        }
-
         log.debug("Intentando eliminar Lote con id: {}", id);
 
         repository.findById(id)
-                        .orElseThrow(() -> new LoteNotFoundException(id));
+                .orElseThrow(() -> new LoteNotFoundException(id));
 
         repository.deleteById(id);
         log.info("Lote con id: {} eliminado exitosamente", id);
