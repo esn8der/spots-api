@@ -4,6 +4,8 @@ import com.sioma.spotsapi.domain.exception.LoteNotFoundException;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.fixtures.LoteFixtures;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,35 +18,63 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("GetLoteByIdUseCase - Pruebas de aplicación")
 class GetLoteByIdUseCaseTest {
+
     @Mock
-    LoteRepository repository;
+    private LoteRepository repository;
 
     @InjectMocks
-    GetLoteByIdUseCase useCase;
+    private GetLoteByIdUseCase useCase;
 
-    @Test
-    void shouldThrowExceptionWhenLoteDoesNotExist() {
-        // GIVEN
-        when(repository.findById(LoteFixtures.ID)).thenReturn(Optional.empty());
+    @Nested
+    @DisplayName("Validación de precondiciones")
+    class PreconditionValidation {
 
-        // WHEN + THEN
-        assertThrows(LoteNotFoundException.class,
-                () -> useCase.execute(LoteFixtures.ID)
-        );
+        @Test
+        @DisplayName("lanza LoteNotFoundException cuando el lote no existe")
+        void shouldThrowExceptionWhenLoteDoesNotExist() {
+            // GIVEN: El lote NO existe en el repositorio
+            givenLoteExists(false);
+
+            // WHEN + THEN: Debe lanzar excepción
+            assertThrows(
+                    LoteNotFoundException.class,
+                    () -> useCase.execute(LoteFixtures.ID),
+                    "Debe lanzar excepción cuando el lote no existe"
+            );
+        }
     }
 
-    @Test
-    void shouldReturnLoteWhenExists() {
-        // GIVEN
-        Lote lote = LoteFixtures.anyLote();
-        when(repository.findById(LoteFixtures.ID)).thenReturn(Optional.of(lote));
+    @Nested
+    @DisplayName("Consulta exitosa")
+    class HappyPath {
 
-        // WHEN
-        Lote result = useCase.execute(LoteFixtures.ID);
+        @Test
+        @DisplayName("retorna el lote cuando existe")
+        void shouldReturnLoteWhenExists() {
+            // GIVEN: El lote existe
+            givenLoteExists(true);
 
-        // THEN
-        assertSame(lote, result);
+            // WHEN: Ejecutamos el caso de uso
+            Lote result = useCase.execute(LoteFixtures.ID);
+
+            // THEN: Verifica que se retornó el lote esperado
+            assertNotNull(result, "El resultado no debe ser null");
+            assertEquals(LoteFixtures.ID, result.getId(), "El ID del lote debe coincidir");
+            assertEquals(LoteFixtures.NOMBRE, result.getNombre(), "El nombre del lote debe coincidir");
+        }
     }
 
+    // ===== Helpers BDD =====
+
+    private void givenLoteExists(boolean exists) {
+        if (exists) {
+            when(repository.findById(LoteFixtures.ID))
+                    .thenReturn(Optional.of(LoteFixtures.anyLote()));
+        } else {
+            when(repository.findById(LoteFixtures.ID))
+                    .thenReturn(Optional.empty());
+        }
+    }
 }

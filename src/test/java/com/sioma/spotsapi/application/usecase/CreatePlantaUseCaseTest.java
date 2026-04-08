@@ -1,9 +1,11 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.fixtures.PlantaFixtures;
 import com.sioma.spotsapi.domain.exception.PlantaAlreadyExistsException;
 import com.sioma.spotsapi.domain.model.Planta;
 import com.sioma.spotsapi.domain.repository.PlantaRepository;
+import com.sioma.spotsapi.fixtures.PlantaFixtures;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -11,55 +13,66 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @ExtendWith(MockitoExtension.class)
+@DisplayName("CreatePlantaUseCase - Pruebas de aplicación")
 class CreatePlantaUseCaseTest {
 
     @Mock
-    PlantaRepository repository;
+    private PlantaRepository repository;
 
     @InjectMocks
-    CreatePlantaUseCase useCase;
+    private CreatePlantaUseCase useCase;
 
-    @Test
-    void shouldThrowExceptionWhenNombreExists() {
-        // GIVEN
-        givenPlantaExists(true);
+    @Nested
+    @DisplayName("Validación de precondiciones")
+    class PreconditionValidation {
 
-        // WHEN + THEN
-        assertThrows(PlantaAlreadyExistsException.class,
-                () -> useCase.execute(
-                        PlantaFixtures.NOMBRE
-                )
-        );
+        @Test
+        @DisplayName("lanza PlantaAlreadyExistsException cuando el nombre ya está registrado")
+        void shouldThrowPlantaAlreadyExistsExceptionWhenNombreAlreadyExists() {
+            // GIVEN: Ya existe una planta con ese nombre
+            givenPlantaExists(true);
 
-        // THEN
-        verify(repository, never()).save(any(Planta.class));
+            // WHEN + THEN: Debe lanzar excepción y NO guardar nada
+            assertThrows(
+                    PlantaAlreadyExistsException.class,
+                    () -> useCase.execute(PlantaFixtures.NOMBRE),
+                    "Debe lanzar excepción cuando el nombre de la planta ya está registrado"
+            );
+
+            // AND: Verifica que no se hicieron operaciones innecesarias
+            verify(repository, never()).save(any(Planta.class));
+        }
     }
 
-    @Test
-    void shouldCreatePlantaSuccessfully() {
-        // GIVEN
-        givenPlantaExists(false);
+    @Nested
+    @DisplayName("Creación exitosa")
+    class HappyPath {
 
-        // WHEN
-        useCase.execute(PlantaFixtures.NOMBRE);
+        @Test
+        @DisplayName("crea la planta con el nombre correcto")
+        void shouldCreatePlantaSuccessfullyWithCorrectNombre() {
+            // GIVEN: El nombre no existe aún
+            givenPlantaExists(false);
 
-        // THEN
-        ArgumentCaptor<Planta> plantaCaptor = ArgumentCaptor.forClass(Planta.class);
-        verify(repository).save(plantaCaptor.capture());
+            // WHEN: Ejecutamos el caso de uso
+            useCase.execute(PlantaFixtures.NOMBRE);
 
-        Planta savedPlanta = plantaCaptor.getValue();
+            // THEN: Verifica que se llamó a save con los datos correctos
+            ArgumentCaptor<Planta> plantaCaptor = ArgumentCaptor.forClass(Planta.class);
+            verify(repository).save(plantaCaptor.capture());
 
-        assertEquals(PlantaFixtures.NOMBRE, savedPlanta.getNombre());
+            Planta savedPlanta = plantaCaptor.getValue();
+            assertEquals(PlantaFixtures.NOMBRE, savedPlanta.getNombre(), "El nombre de la planta debe ser el esperado");
+        }
     }
 
+    // ===== Helpers BDD =====
     private void givenPlantaExists(boolean exists) {
-        when(repository.existsByNombreIgnoreCase(PlantaFixtures.NOMBRE))
-                .thenReturn(exists);
+        when(repository.existsByNombreIgnoreCase(PlantaFixtures.NOMBRE)).thenReturn(exists);
     }
 }

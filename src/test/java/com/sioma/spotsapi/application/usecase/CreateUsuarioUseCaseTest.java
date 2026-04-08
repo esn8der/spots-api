@@ -1,10 +1,12 @@
 package com.sioma.spotsapi.application.usecase;
 
-import com.sioma.spotsapi.domain.ports.out.PasswordHasher;
-import com.sioma.spotsapi.fixtures.UsuarioFixtures;
 import com.sioma.spotsapi.domain.exception.UsuarioAlreadyExistsException;
 import com.sioma.spotsapi.domain.model.Usuario;
+import com.sioma.spotsapi.domain.ports.out.PasswordHasher;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
+import com.sioma.spotsapi.fixtures.UsuarioFixtures;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -12,74 +14,95 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @ExtendWith(MockitoExtension.class)
+@DisplayName("CreateUsuarioUseCase - Pruebas de aplicación")
 class CreateUsuarioUseCaseTest {
 
     @Mock
-    UsuarioRepository repository;
+    private UsuarioRepository repository;
 
     @Mock
-    PasswordHasher passwordHasher;
+    private PasswordHasher passwordHasher;
 
     @InjectMocks
-    CreateUsuarioUseCase useCase;
+    private CreateUsuarioUseCase useCase;
 
-    @Test
-    void shouldThrowExceptionWhenEmailExists() {
+    @Nested
+    @DisplayName("Validación de precondiciones")
+    class PreconditionValidation {
 
-        // GIVEN
-        givenUsuarioExists(true);
+        @Test
+        @DisplayName("lanza UsuarioAlreadyExistsException cuando el email ya está registrado")
+        void shouldThrowUsuarioAlreadyExistsExceptionWhenEmailAlreadyExists() {
+            // GIVEN: Ya existe un usuario con ese email
+            givenUsuarioExists(true);
 
-        // WHEN + THEN
-        assertThrows(
-                UsuarioAlreadyExistsException.class,
-                () -> useCase.execute(
-                        UsuarioFixtures.NOMBRE,
-                        UsuarioFixtures.EMAIL,
-                        UsuarioFixtures.PASSWORD
-                )
-        );
+            // WHEN + THEN: Debe lanzar excepción y NO procesar nada
+            assertThrows(
+                    UsuarioAlreadyExistsException.class,
+                    () -> useCase.execute(
+                            UsuarioFixtures.NOMBRE,
+                            UsuarioFixtures.EMAIL,
+                            UsuarioFixtures.PASSWORD
+                    ),
+                    "Debe lanzar excepción cuando el email ya está registrado"
+            );
 
-        // THEN
-        verify(passwordHasher, never()).hash(any());
-        verify(repository, never()).save(any());
+            // AND: Verifica que no se hicieron operaciones innecesarias
+            verify(passwordHasher, never()).hash(anyString());
+            verify(repository, never()).save(any(Usuario.class));
+        }
     }
 
-    @Test
-    void shouldCreateUsuarioSuccessfully() {
+    @Nested
+    @DisplayName("Creación exitosa")
+    class HappyPath {
 
-        // GIVEN
-        givenUsuarioExists(false);
-        when(passwordHasher.hash(UsuarioFixtures.PASSWORD))
-                .thenReturn(UsuarioFixtures.PASSWORD_HASHED);
+        @Test
+        @DisplayName("hashea el password antes de guardar el usuario")
+        void shouldHashPasswordBeforeSavingUsuario() {
+            // GIVEN: El email no existe y el hasher está configurado
+            givenUsuarioExists(false);
+            when(passwordHasher.hash(UsuarioFixtures.PASSWORD))
+                    .thenReturn(UsuarioFixtures.PASSWORD_HASHED);
 
-        // WHEN
-        useCase.execute(
-                UsuarioFixtures.NOMBRE,
-                UsuarioFixtures.EMAIL,
-                UsuarioFixtures.PASSWORD
-        );
+            // WHEN
+            useCase.execute(UsuarioFixtures.NOMBRE, UsuarioFixtures.EMAIL, UsuarioFixtures.PASSWORD);
 
-        // THEN
-        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
-        verify(repository).save(usuarioCaptor.capture());
-        verify(passwordHasher).hash(UsuarioFixtures.PASSWORD);
+            // THEN: Verifica que el hasher fue llamado con el password en claro
+            verify(passwordHasher).hash(UsuarioFixtures.PASSWORD);
+            verify(repository, never()).save(argThat(u -> UsuarioFixtures.PASSWORD.equals(u.getPassword())));
+        }
 
-        Usuario savedUsuario = usuarioCaptor.getValue();
+        @Test
+        @DisplayName("crea el usuario con los datos correctos y password hasheado")
+        void shouldCreateUsuarioSuccessfullyWithHashedPassword() {
+            // GIVEN: El email no existe y el hasher está configurado
+            givenUsuarioExists(false);
+            when(passwordHasher.hash(UsuarioFixtures.PASSWORD))
+                    .thenReturn(UsuarioFixtures.PASSWORD_HASHED);
 
-        assertEquals(UsuarioFixtures.NOMBRE, savedUsuario.getNombre());
-        assertEquals(UsuarioFixtures.EMAIL, savedUsuario.getEmail());
-        assertEquals(UsuarioFixtures.PASSWORD_HASHED, savedUsuario.getPassword());
+            // WHEN: Ejecutamos el caso de uso
+            useCase.execute(UsuarioFixtures.NOMBRE, UsuarioFixtures.EMAIL, UsuarioFixtures.PASSWORD);
+
+            // THEN: Verifica que se llamó a save con los datos correctos
+            ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
+            verify(repository).save(usuarioCaptor.capture());
+
+            Usuario savedUsuario = usuarioCaptor.getValue();
+            assertEquals(UsuarioFixtures.NOMBRE, savedUsuario.getNombre(), "El nombre debe ser el esperado");
+            assertEquals(UsuarioFixtures.EMAIL, savedUsuario.getEmail(), "El email debe ser el esperado");
+            assertEquals(UsuarioFixtures.PASSWORD_HASHED, savedUsuario.getPassword(), "El password debe estar hasheado");
+        }
     }
 
+    // ===== Helpers =====
     private void givenUsuarioExists(boolean exists) {
-        when(repository.existsByEmailIgnoreCase(
-                        UsuarioFixtures.EMAIL))
-                .thenReturn(exists);
+        when(repository.existsByEmailIgnoreCase(UsuarioFixtures.EMAIL)).thenReturn(exists);
     }
 }

@@ -4,6 +4,8 @@ import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
 import com.sioma.spotsapi.fixtures.UsuarioFixtures;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,35 +18,64 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("GetUsuarioByIdUseCase - Pruebas de aplicación")
 class GetUsuarioByIdUseCaseTest {
+
     @Mock
-    UsuarioRepository repository;
+    private UsuarioRepository repository;
 
     @InjectMocks
-    GetUsuarioByIdUseCase useCase;
+    private GetUsuarioByIdUseCase useCase;
 
-    @Test
-    void shouldThrowExceptionWhenUsuarioDoesNotExist() {
-        // GIVEN
-        when(repository.findById(UsuarioFixtures.ID)).thenReturn(Optional.empty());
+    @Nested
+    @DisplayName("Validación de precondiciones")
+    class PreconditionValidation {
 
-        // WHEN + THEN
-        assertThrows(UsuarioNotFoundException.class,
-                () -> useCase.execute(UsuarioFixtures.ID)
-        );
+        @Test
+        @DisplayName("lanza UsuarioNotFoundException cuando el usuario no existe")
+        void shouldThrowExceptionWhenUsuarioDoesNotExist() {
+            // GIVEN: El usuario NO existe en el repositorio
+            givenUsuarioExists(false);
+
+            // WHEN + THEN: Debe lanzar excepción
+            assertThrows(
+                    UsuarioNotFoundException.class,
+                    () -> useCase.execute(UsuarioFixtures.ID),
+                    "Debe lanzar excepción cuando el usuario no existe"
+            );
+        }
     }
 
-    @Test
-    void shouldReturnUsuarioWhenExists() {
-        // GIVEN
-        Usuario usuario = UsuarioFixtures.anyUsuario();
-        when(repository.findById(UsuarioFixtures.ID))
-                .thenReturn(Optional.of(usuario));
+    @Nested
+    @DisplayName("Consulta exitosa")
+    class HappyPath {
 
-        // WHEN
-        Usuario result = useCase.execute(UsuarioFixtures.ID);
+        @Test
+        @DisplayName("retorna el usuario cuando existe")
+        void shouldReturnUsuarioWhenExists() {
+            // GIVEN: El usuario existe
+            givenUsuarioExists(true);
 
-        // THEN
-        assertSame(usuario, result);
+            // WHEN: Ejecutamos el caso de uso
+            Usuario result = useCase.execute(UsuarioFixtures.ID);
+
+            // THEN: Verifica que se retornó el usuario esperado
+            assertNotNull(result, "El resultado no debe ser null");
+            assertEquals(UsuarioFixtures.ID, result.getId(), "El ID del usuario debe coincidir");
+            assertEquals(UsuarioFixtures.NOMBRE, result.getNombre(), "El nombre del usuario debe coincidir");
+            assertEquals(UsuarioFixtures.EMAIL, result.getEmail(), "El email del usuario debe coincidir");
+        }
+    }
+
+    // ===== Helpers BDD =====
+
+    private void givenUsuarioExists(boolean exists) {
+        if (exists) {
+            when(repository.findById(UsuarioFixtures.ID))
+                    .thenReturn(Optional.of(UsuarioFixtures.anyUsuario()));
+        } else {
+            when(repository.findById(UsuarioFixtures.ID))
+                    .thenReturn(Optional.empty());
+        }
     }
 }
