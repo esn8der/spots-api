@@ -32,6 +32,18 @@ public class Lote {
         return new Spot(coordenada, this.id, posicion);
     }
 
+    public Lote withNombre(String nuevoNombre) {
+        if (nuevoNombre == null || nuevoNombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío");
+        }
+
+        return new Lote(this.id, nuevoNombre, this.geocerca, this.fincaId, this.tipoCultivoId);
+    }
+
+    public Lote renombrar(String nuevoNombre) {
+        return withNombre(nuevoNombre);
+    }
+
     public void marcarComoEnAgp() {
         this.onAgp = true;
     }

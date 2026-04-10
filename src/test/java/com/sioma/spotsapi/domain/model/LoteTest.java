@@ -105,4 +105,83 @@ class LoteTest {
             assertTrue(lote.isOnAgp());
         }
     }
+
+    @Nested
+    @DisplayName("renombrar() / withNombre()")
+    class Renombrar {
+
+        @Test
+        @DisplayName("withNombre() retorna nueva instancia con nombre actualizado")
+        void withNombreRetornaNuevaInstanciaConNombreActualizado() {
+            // GIVEN
+            Lote loteOriginal = LoteFixtures.anyLote();
+            String nuevoNombre = "Nuevo Nombre";
+
+            // WHEN
+            Lote loteRenombrado = loteOriginal.withNombre(nuevoNombre);
+
+            // THEN: Nueva instancia con nombre actualizado
+            assertNotSame(loteOriginal, loteRenombrado, "Debe retornar nueva instancia (inmutabilidad)");
+            assertEquals(nuevoNombre, loteRenombrado.getNombre(), "El nuevo nombre debe ser el esperado");
+
+            // AND: Los demás campos se conservan
+            assertEquals(loteOriginal.getId(), loteRenombrado.getId());
+            assertEquals(loteOriginal.getGeocerca(), loteRenombrado.getGeocerca());
+            assertEquals(loteOriginal.getFincaId(), loteRenombrado.getFincaId());
+            assertEquals(loteOriginal.getTipoCultivoId(), loteRenombrado.getTipoCultivoId());
+        }
+
+        @Test
+        @DisplayName("withNombre() lanza excepción si el nombre es null")
+        void withNombreLanzaExcepcionSiNombreEsNull() {
+            // GIVEN
+            Lote lote = LoteFixtures.anyLote();
+
+            // WHEN + THEN
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> lote.withNombre(null),
+                    "Debe lanzar excepción cuando el nombre es null"
+            );
+        }
+
+        @Test
+        @DisplayName("withNombre() lanza excepción si el nombre está vacío")
+        void withNombreLanzaExcepcionSiNombreEstaVacio() {
+            // GIVEN
+            Lote lote = LoteFixtures.anyLote();
+
+            // WHEN + THEN
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> lote.withNombre(""),
+                    "Debe lanzar excepción cuando el nombre está vacío"
+            );
+
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> lote.withNombre("   "),
+                    "Debe lanzar excepción cuando el nombre tiene solo espacios"
+            );
+        }
+
+        @Test
+        @DisplayName("renombrar() delega correctamente a withNombre()")
+        void renombrarDelegaAWithNombre() {
+            // GIVEN
+            Lote lote = LoteFixtures.anyLote();
+            String nuevoNombre = "Nombre vía alias";
+
+            // WHEN
+            Lote resultadoViaAlias = lote.renombrar(nuevoNombre);
+            Lote resultadoDirecto = lote.withNombre(nuevoNombre);
+
+            // THEN: Ambos deben producir el mismo resultado
+            assertEquals(resultadoViaAlias.getNombre(), resultadoDirecto.getNombre());
+            assertEquals(resultadoViaAlias.getId(), resultadoDirecto.getId());
+            // Nota: Son instancias diferentes (inmutabilidad), pero con mismo estado
+        }
+    }
+
+
 }

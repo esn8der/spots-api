@@ -3,6 +3,7 @@ package com.sioma.spotsapi.infrastructure.persistence.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.locationtech.jts.geom.Polygon;
 
 
@@ -12,6 +13,7 @@ import org.locationtech.jts.geom.Polygon;
 @Table(name = "lote")
 public class LoteEntity {
     @Id
+    @Setter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

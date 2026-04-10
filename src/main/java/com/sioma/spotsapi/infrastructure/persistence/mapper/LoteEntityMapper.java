@@ -19,11 +19,13 @@ public class LoteEntityMapper {
     }
 
     public LoteEntity toEntity(@NonNull Lote domain) {
-        return new LoteEntity(
+        LoteEntity entity = new LoteEntity(
                 domain.getNombre(),
                 domain.getGeocerca(),
                 domain.getFincaId(),
                 domain.getTipoCultivoId()
         );
+        entity.setId(domain.getId());
+        return entity;
     }
 }
