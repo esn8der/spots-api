@@ -1,5 +1,6 @@
 package com.sioma.spotsapi.web.controller;
 
+import com.sioma.spotsapi.web.dto.PageResponse;
 import com.sioma.spotsapi.web.mapper.FincaResponseMapper;
 import com.sioma.spotsapi.web.mapper.LoteResponseMapper;
 import com.sioma.spotsapi.application.usecase.CreateFincaUseCase;
@@ -11,6 +12,7 @@ import com.sioma.spotsapi.web.dto.CreateFincaRequest;
 import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.LoteResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -18,8 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Validated
 @RestController
@@ -53,10 +53,14 @@ public class FincaController {
     }
 
     @GetMapping("/{id}/lotes")
-    public ResponseEntity<List<LoteResponse>> getLotesByFinca(@PathVariable @Min(1) Long id) {
+    public ResponseEntity<PageResponse<LoteResponse>> getLotesByFinca(
+            @PathVariable @Min(1) Long id,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+
         return ResponseEntity.ok(
-                loteResponseMapper.toResponseList(
-                        getLotesByFincaIdUseCase.execute(id)
+                loteResponseMapper.toPageResponse(
+                        getLotesByFincaIdUseCase.execute(id, page, size)
                 )
         );
     }

@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE;
@@ -182,72 +182,156 @@ class LoteJpaRepositoryTest {
     }
 
     @Nested
-    @DisplayName("findAllByFincaId()")
-    class FindAllByFincaId {
+    @DisplayName("findAllByFincaId(Long, Pageable) - Paginación")
+    class FindAllByFincaIdWithPagination {
 
         @Test
-        @DisplayName("devuelve lista vacía cuando no hay lotes para esa finca")
-        void shouldReturnEmptyListWhenNoLotesForFinca() {
+        @DisplayName("devuelve página con contenido correcto y metadatos")
+        void shouldReturnPageWithCorrectContentAndMetadata() {
             // GIVEN
             TestData data = createBaseData();
-
-            // WHEN
-            List<LoteEntity> lotes = repository.findAllByFincaId(data.fincaId());
-
-            // THEN
-            assertTrue(lotes.isEmpty(), "Debe retornar lista vacía cuando no hay lotes");
-        }
-
-        @Test
-        @DisplayName("devuelve solo los lotes de la finca solicitada")
-        void shouldReturnOnlyLotesFromRequestedFinca() {
-            // GIVEN: Dos fincas con lotes diferentes
-            TestData data1 = createBaseData();
-
-            UsuarioEntity usuario2 = usuarioRepository.save(
-                    new UsuarioEntity(UsuarioFixtures.NOMBRE, UsuarioFixtures.uniqueEmail(), UsuarioFixtures.PASSWORD)
-            );
-            FincaEntity finca2 = fincaRepository.save(
-                    new FincaEntity(FincaFixtures.uniqueName(), usuario2.getId())
-            );
-            PlantaEntity planta2 = plantaRepository.save(
-                    new PlantaEntity(PlantaFixtures.uniqueName())
-            );
-            TestData data2 = new TestData(usuario2.getId(), finca2.getId(), planta2.getId());
-
             Polygon geocerca = LoteFixtures.anyGeocerca();
+            repository.save(new LoteEntity("Lote A", geocerca, data.fincaId(), data.plantaId()));
+            repository.save(new LoteEntity("Lote B", geocerca, data.fincaId(), data.plantaId()));
+            repository.save(new LoteEntity("Lote C", geocerca, data.fincaId(), data.plantaId()));
 
-            // Lotes para finca1
-            repository.save(new LoteEntity("Lote A", geocerca, data1.fincaId(), data1.plantaId()));
-            repository.save(new LoteEntity("Lote B", geocerca, data1.fincaId(), data1.plantaId()));
-
-            // Lote para finca2
-            repository.save(new LoteEntity("Lote C", geocerca, data2.fincaId(), data2.plantaId()));
+            Pageable pageable = PageRequest.of(0, 2, Sort.by("nombre").ascending());
 
             // WHEN
-            List<LoteEntity> lotes = repository.findAllByFincaId(data1.fincaId());
+            Page<LoteEntity> result = repository.findAllByFincaId(data.fincaId(), pageable);
 
             // THEN
-            assertEquals(2, lotes.size(), "Debe retornar exactamente 2 lotes para finca1");
-            assertTrue(
-                    lotes.stream().allMatch(l -> l.getFincaId().equals(data1.fincaId())),
-                    "Todos los lotes deben pertenecer a la finca solicitada"
-            );
-            assertEquals(
-                    Set.of("Lote A", "Lote B"),
-                    lotes.stream().map(LoteEntity::getNombre).collect(Collectors.toSet()),
-                    "Debe retornar los nombres correctos de los lotes"
-            );
+            assertEquals(2, result.getContent().size(), "Debe retornar 2 elementos por página");
+            assertEquals(0, result.getNumber(), "Debe ser la página 0");
+            assertEquals(2, result.getSize(), "El tamaño de página debe ser 2");
+            assertEquals(3, result.getTotalElements(), "Debe haber 3 elementos en total");
+            assertEquals(2, result.getTotalPages(), "Debe haber 2 páginas en total");
+            assertTrue(result.hasContent(), "Debe tener contenido");
+            assertFalse(result.isEmpty(), "No debe estar vacío");
+
+            // Verificar ordenamiento por nombre (asc)
+            assertEquals("Lote A", result.getContent().get(0).getNombre(),
+                    "Primer elemento debe ser 'Lote A'");
+            assertEquals("Lote B", result.getContent().get(1).getNombre(),
+                    "Segundo elemento debe ser 'Lote B'");
         }
 
         @Test
-        @DisplayName("maneja correctamente cuando la finca no existe")
-        void shouldHandleNonExistentFincaId() {
-            // WHEN: Consultamos lotes de una finca que no existe
-            List<LoteEntity> lotes = repository.findAllByFincaId(99999L);
+        @DisplayName("devuelve página vacía cuando no hay resultados")
+        void shouldReturnEmptyPageWhenNoResults() {
+            // GIVEN
+            TestData data = createBaseData();
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // WHEN
+            Page<LoteEntity> result = repository.findAllByFincaId(data.fincaId(), pageable);
 
             // THEN
-            assertTrue(lotes.isEmpty(), "Debe retornar lista vacía para finca inexistente");
+            assertTrue(result.isEmpty(), "Debe estar vacío cuando no hay lotes");
+            assertEquals(0, result.getTotalElements(), "Total de elementos debe ser 0");
+            assertEquals(0, result.getTotalPages(), "Total de páginas debe ser 0");
+        }
+
+        @Test
+        @DisplayName("devuelve página vacía cuando el número de página está fuera de rango")
+        void shouldReturnEmptyPageWhenPageNumberIsOutOfRange() {
+            // GIVEN
+            TestData data = createBaseData();
+            Polygon geocerca = LoteFixtures.anyGeocerca();
+            repository.save(new LoteEntity("Lote Único", geocerca, data.fincaId(), data.plantaId()));
+            Pageable pageable = PageRequest.of(999, 10); // Página inexistente
+
+            // WHEN
+            Page<LoteEntity> result = repository.findAllByFincaId(data.fincaId(), pageable);
+
+            // THEN
+            assertTrue(result.isEmpty(), "Debe retornar contenido vacío para página fuera de rango");
+            assertEquals(1, result.getTotalElements(), "Pero los metadatos totales deben ser correctos");
+        }
+
+        @Test
+        @DisplayName("aplica ordenamiento ascendente por nombre por defecto")
+        void shouldApplyAscendingSortByNameByDefault() {
+            // GIVEN
+            TestData data = createBaseData();
+            Polygon geocerca = LoteFixtures.anyGeocerca();
+            repository.save(new LoteEntity("Zebra", geocerca, data.fincaId(), data.plantaId()));
+            repository.save(new LoteEntity("Alpha", geocerca, data.fincaId(), data.plantaId()));
+            repository.save(new LoteEntity("Mango", geocerca, data.fincaId(), data.plantaId()));
+
+            Pageable pageable = PageRequest.of(0, 10, Sort.by("nombre").ascending());
+
+            // WHEN
+            Page<LoteEntity> result = repository.findAllByFincaId(data.fincaId(), pageable);
+
+            // THEN
+            assertEquals(3, result.getContent().size(), "Debe retornar los 3 elementos");
+            assertEquals("Alpha", result.getContent().get(0).getNombre(),
+                    "Primer elemento debe ser 'Alpha'");
+            assertEquals("Mango", result.getContent().get(1).getNombre(),
+                    "Segundo elemento debe ser 'Mango'");
+            assertEquals("Zebra", result.getContent().get(2).getNombre(),
+                    "Tercer elemento debe ser 'Zebra'");
+        }
+
+        @Test
+        @DisplayName("aplica ordenamiento descendente cuando se especifica")
+        void shouldApplyDescendingSortWhenSpecified() {
+            // GIVEN
+            TestData data = createBaseData();
+            Polygon geocerca = LoteFixtures.anyGeocerca();
+            repository.save(new LoteEntity("Alpha", geocerca, data.fincaId(), data.plantaId()));
+            repository.save(new LoteEntity("Mango", geocerca, data.fincaId(), data.plantaId()));
+            repository.save(new LoteEntity("Zebra", geocerca, data.fincaId(), data.plantaId()));
+
+            Pageable pageable = PageRequest.of(0, 10, Sort.by("nombre").descending());
+
+            // WHEN
+            Page<LoteEntity> result = repository.findAllByFincaId(data.fincaId(), pageable);
+
+            // THEN
+            assertEquals("Zebra", result.getContent().getFirst().getNombre(),
+                    "Primer elemento debe ser 'Zebra' en orden descendente");
+            assertEquals("Alpha", result.getContent().get(2).getNombre(),
+                    "Último elemento debe ser 'Alpha'");
+        }
+
+        @Test
+        @DisplayName("maneja correctamente tamaño de página personalizado")
+        void shouldHandleCustomPageSize() {
+            // GIVEN
+            TestData data = createBaseData();
+            Polygon geocerca = LoteFixtures.anyGeocerca();
+            for (int i = 1; i <= 25; i++) {
+                repository.save(new LoteEntity("Lote-" + String.format("%02d", i), geocerca, data.fincaId(), data.plantaId()));
+            }
+
+            Pageable pageable = PageRequest.of(1, 10, Sort.by("nombre").ascending()); // Página 1 = elementos 10-19
+
+            // WHEN
+            Page<LoteEntity> result = repository.findAllByFincaId(data.fincaId(), pageable);
+
+            // THEN
+            assertEquals(10, result.getContent().size(), "Debe retornar 10 elementos por página");
+            assertEquals(1, result.getNumber(), "Debe ser la página 1 (base 0)");
+            assertEquals(25, result.getTotalElements(), "Total debe ser 25");
+            assertEquals(3, result.getTotalPages(), "Debe haber 3 páginas en total");
+            assertEquals("Lote-11", result.getContent().getFirst().getNombre(),
+                    "Primer elemento de página 1 debe ser 'Lote-11'");
+        }
+
+        @Test
+        @DisplayName("maneja finca inexistente retornando página vacía")
+        void shouldHandleNonExistentFincaReturningEmptyPage() {
+            // GIVEN
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // WHEN
+            Page<LoteEntity> result = repository.findAllByFincaId(99999L, pageable);
+
+            // THEN
+            assertTrue(result.isEmpty(), "Debe retornar página vacía para finca inexistente");
+            assertEquals(0, result.getTotalElements(), "Total de elementos debe ser 0");
         }
     }
 }

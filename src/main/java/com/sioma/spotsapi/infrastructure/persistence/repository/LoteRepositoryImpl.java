@@ -1,10 +1,15 @@
 package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Lote;
+import com.sioma.spotsapi.domain.model.PageResult;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entity.LoteEntity;
 import com.sioma.spotsapi.infrastructure.persistence.mapper.LoteEntityMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,11 +34,21 @@ public class LoteRepositoryImpl implements LoteRepository {
     }
 
     @Override
-    public List<Lote> findAllByFincaId(Long fincaId) {
-        return jpaRepository.findAllByFincaId(fincaId)
+    public PageResult<Lote> findAllByFincaId(Long fincaId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
+        Page<LoteEntity> pageResult = jpaRepository.findAllByFincaId(fincaId, pageable);
+        List<Lote> lotes = pageResult.getContent()
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
+
+        return new PageResult<>(
+                lotes,
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.getTotalPages()
+        );
     }
 
     @Override

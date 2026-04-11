@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE;
@@ -41,7 +41,8 @@ class FincaJpaRepositoryTest {
     }
 
     // Record inmutable para datos de test (evita variables de instancia compartidas)
-    private record TestData(Long usuarioId) {}
+    private record TestData(Long usuarioId) {
+    }
 
     @Nested
     @DisplayName("existsByNombreIgnoreCaseAndUsuarioId()")
@@ -158,64 +159,151 @@ class FincaJpaRepositoryTest {
     }
 
     @Nested
-    @DisplayName("findAllByUsuarioId()")
-    class FindAllByUsuarioId {
+    @DisplayName("findAllByUsuarioId(Long, Pageable) - Paginación")
+    class FindAllByUsuarioIdWithPagination {
 
         @Test
-        @DisplayName("devuelve lista vacía cuando no hay fincas para ese usuario")
-        void shouldReturnEmptyListWhenNoFincasForUsuario() {
+        @DisplayName("devuelve página con contenido correcto y metadatos")
+        void shouldReturnPageWithCorrectContentAndMetadata() {
             // GIVEN
             TestData data = createBaseData();
+            repository.save(new FincaEntity("Finca A", data.usuarioId()));
+            repository.save(new FincaEntity("Finca B", data.usuarioId()));
+            repository.save(new FincaEntity("Finca C", data.usuarioId()));
+
+            Pageable pageable = PageRequest.of(0, 2, Sort.by("nombre").ascending());
 
             // WHEN
-            List<FincaEntity> fincas = repository.findAllByUsuarioId(data.usuarioId());
+            Page<FincaEntity> result = repository.findAllByUsuarioId(data.usuarioId(), pageable);
 
             // THEN
-            assertTrue(fincas.isEmpty(), "Debe retornar lista vacía cuando no hay fincas");
+            assertEquals(2, result.getContent().size(), "Debe retornar 2 elementos por página");
+            assertEquals(0, result.getNumber(), "Debe ser la página 0");
+            assertEquals(2, result.getSize(), "El tamaño de página debe ser 2");
+            assertEquals(3, result.getTotalElements(), "Debe haber 3 elementos en total");
+            assertEquals(2, result.getTotalPages(), "Debe haber 2 páginas en total");
+            assertTrue(result.hasContent(), "Debe tener contenido");
+            assertFalse(result.isEmpty(), "No debe estar vacío");
+
+            // Verificar ordenamiento por nombre (asc)
+            assertEquals("Finca A", result.getContent().get(0).getNombre(),
+                    "Primer elemento debe ser 'Finca A'");
+            assertEquals("Finca B", result.getContent().get(1).getNombre(),
+                    "Segundo elemento debe ser 'Finca B'");
         }
 
         @Test
-        @DisplayName("devuelve solo las fincas del usuario solicitado")
-        void shouldReturnOnlyFincasFromRequestedUsuario() {
-            // GIVEN: Dos usuarios con fincas diferentes
-            TestData data1 = createBaseData();
-
-            UsuarioEntity usuario2 = usuarioRepository.save(
-                    new UsuarioEntity(UsuarioFixtures.NOMBRE, UsuarioFixtures.uniqueEmail(), UsuarioFixtures.PASSWORD)
-            );
-            TestData data2 = new TestData(usuario2.getId());
-
-            // Fincas para usuario1
-            repository.save(new FincaEntity("Finca A", data1.usuarioId()));
-            repository.save(new FincaEntity("Finca B", data1.usuarioId()));
-
-            // Finca para usuario2
-            repository.save(new FincaEntity("Finca C", data2.usuarioId()));
+        @DisplayName("devuelve página vacía cuando no hay resultados")
+        void shouldReturnEmptyPageWhenNoResults() {
+            // GIVEN
+            TestData data = createBaseData();
+            Pageable pageable = PageRequest.of(0, 10);
 
             // WHEN
-            List<FincaEntity> fincas = repository.findAllByUsuarioId(data1.usuarioId());
+            Page<FincaEntity> result = repository.findAllByUsuarioId(data.usuarioId(), pageable);
 
             // THEN
-            assertEquals(2, fincas.size(), "Debe retornar exactamente 2 fincas para usuario1");
-            assertTrue(
-                    fincas.stream().allMatch(f -> f.getUsuarioId().equals(data1.usuarioId())),
-                    "Todas las fincas deben pertenecer al usuario solicitado"
-            );
-            assertEquals(
-                    Set.of("Finca A", "Finca B"),
-                    fincas.stream().map(FincaEntity::getNombre).collect(Collectors.toSet()),
-                    "Debe retornar los nombres correctos de las fincas"
-            );
+            assertTrue(result.isEmpty(), "Debe estar vacío cuando no hay fincas");
+            assertEquals(0, result.getTotalElements(), "Total de elementos debe ser 0");
+            assertEquals(0, result.getTotalPages(), "Total de páginas debe ser 0");
         }
 
         @Test
-        @DisplayName("maneja correctamente cuando el usuario no existe")
-        void shouldHandleNonExistentUsuarioId() {
-            // WHEN: Consultamos fincas de un usuario que no existe
-            List<FincaEntity> fincas = repository.findAllByUsuarioId(99999L);
+        @DisplayName("devuelve página vacía cuando el número de página está fuera de rango")
+        void shouldReturnEmptyPageWhenPageNumberIsOutOfRange() {
+            // GIVEN
+            TestData data = createBaseData();
+            repository.save(new FincaEntity("Finca Única", data.usuarioId()));
+            Pageable pageable = PageRequest.of(999, 10); // Página inexistente
+
+            // WHEN
+            Page<FincaEntity> result = repository.findAllByUsuarioId(data.usuarioId(), pageable);
 
             // THEN
-            assertTrue(fincas.isEmpty(), "Debe retornar lista vacía para usuario inexistente");
+            assertTrue(result.isEmpty(), "Debe retornar contenido vacío para página fuera de rango");
+            assertEquals(1, result.getTotalElements(), "Pero los metadatos totales deben ser correctos");
+        }
+
+        @Test
+        @DisplayName("aplica ordenamiento ascendente por nombre por defecto")
+        void shouldApplyAscendingSortByNameByDefault() {
+            // GIVEN
+            TestData data = createBaseData();
+            repository.save(new FincaEntity("Zebra", data.usuarioId()));
+            repository.save(new FincaEntity("Alpha", data.usuarioId()));
+            repository.save(new FincaEntity("Mango", data.usuarioId()));
+
+            Pageable pageable = PageRequest.of(0, 10, Sort.by("nombre").ascending());
+
+            // WHEN
+            Page<FincaEntity> result = repository.findAllByUsuarioId(data.usuarioId(), pageable);
+
+            // THEN
+            assertEquals(3, result.getContent().size(), "Debe retornar los 3 elementos");
+            assertEquals("Alpha", result.getContent().get(0).getNombre(),
+                    "Primer elemento debe ser 'Alpha'");
+            assertEquals("Mango", result.getContent().get(1).getNombre(),
+                    "Segundo elemento debe ser 'Mango'");
+            assertEquals("Zebra", result.getContent().get(2).getNombre(),
+                    "Tercer elemento debe ser 'Zebra'");
+        }
+
+        @Test
+        @DisplayName("aplica ordenamiento descendente cuando se especifica")
+        void shouldApplyDescendingSortWhenSpecified() {
+            // GIVEN
+            TestData data = createBaseData();
+            repository.save(new FincaEntity("Alpha", data.usuarioId()));
+            repository.save(new FincaEntity("Mango", data.usuarioId()));
+            repository.save(new FincaEntity("Zebra", data.usuarioId()));
+
+            Pageable pageable = PageRequest.of(0, 10, Sort.by("nombre").descending());
+
+            // WHEN
+            Page<FincaEntity> result = repository.findAllByUsuarioId(data.usuarioId(), pageable);
+
+            // THEN
+            assertEquals("Zebra", result.getContent().get(0).getNombre(),
+                    "Primer elemento debe ser 'Zebra' en orden descendente");
+            assertEquals("Alpha", result.getContent().get(2).getNombre(),
+                    "Último elemento debe ser 'Alpha'");
+        }
+
+        @Test
+        @DisplayName("maneja correctamente tamaño de página personalizado")
+        void shouldHandleCustomPageSize() {
+            // GIVEN
+            TestData data = createBaseData();
+            for (int i = 1; i <= 25; i++) {
+                repository.save(new FincaEntity("Finca-" + String.format("%02d", i), data.usuarioId()));
+            }
+
+            Pageable pageable = PageRequest.of(1, 10, Sort.by("nombre").ascending()); // Página 1 = elementos 10-19
+
+            // WHEN
+            Page<FincaEntity> result = repository.findAllByUsuarioId(data.usuarioId(), pageable);
+
+            // THEN
+            assertEquals(10, result.getContent().size(), "Debe retornar 10 elementos por página");
+            assertEquals(1, result.getNumber(), "Debe ser la página 1 (base 0)");
+            assertEquals(25, result.getTotalElements(), "Total debe ser 25");
+            assertEquals(3, result.getTotalPages(), "Debe haber 3 páginas en total");
+            assertEquals("Finca-11", result.getContent().getFirst().getNombre(),
+                    "Primer elemento de página 1 debe ser 'Finca-11'");
+        }
+
+        @Test
+        @DisplayName("maneja usuario inexistente retornando página vacía")
+        void shouldHandleNonExistentUsuarioReturningEmptyPage() {
+            // GIVEN
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // WHEN
+            Page<FincaEntity> result = repository.findAllByUsuarioId(99999L, pageable);
+
+            // THEN
+            assertTrue(result.isEmpty(), "Debe retornar página vacía para usuario inexistente");
+            assertEquals(0, result.getTotalElements(), "Total de elementos debe ser 0");
         }
     }
 }
