@@ -1,10 +1,10 @@
 package com.sioma.spotsapi.web.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Representación de una planta")
 public record PlantaResponse(
-        @NotNull Long id,
-        @NotBlank String nombre
+        @Schema(description = "ID único", example = "5") Long id,
+        @Schema(description = "Nombre de la planta", example = "Banano") String nombre
 ) {
 }

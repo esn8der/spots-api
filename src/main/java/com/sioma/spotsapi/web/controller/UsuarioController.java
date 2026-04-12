@@ -11,6 +11,10 @@ import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.web.dto.CreateUsuarioRequest;
 import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.UsuarioResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/usuarios")
+@Tag(name = "Usuarios", description = "Gestión de usuarios")
 public class UsuarioController {
     private final CreateUsuarioUseCase useCase;
     private final GetUsuarioByIdUseCase getUsuarioByIdUseCase;
@@ -33,6 +38,10 @@ public class UsuarioController {
     private final UsuarioResponseMapper usuarioResponseMapper;
     private final FincaResponseMapper fincaResponseMapper;
 
+    @Operation(summary = "Crear un nuevo usuario")
+    @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente")
+    @ApiResponse(responseCode = "400", description = "Payload inválido o datos faltantes")
+    @ApiResponse(responseCode = "409", description = "Email de usuario duplicado")
     @PostMapping
     public ResponseEntity<UsuarioResponse> create(@Valid @RequestBody CreateUsuarioRequest request) {
         Usuario usuario = useCase.execute(
@@ -46,8 +55,13 @@ public class UsuarioController {
                 .body(usuarioResponseMapper.toResponse(usuario));
     }
 
+    @Operation(summary = "Obtener usuario por ID")
+    @ApiResponse(responseCode = "200", description = "Usuario encontrado")
+    @ApiResponse(responseCode = "404", description = "Usuario no existe")
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponse> getById(@PathVariable @Min(1) Long id) {
+    public ResponseEntity<UsuarioResponse> getById(
+            @Parameter(description = "ID del usuario", example = "5") @PathVariable @Min(1) Long id
+    ) {
         return ResponseEntity.ok(
                 usuarioResponseMapper.toResponse(
                         getUsuarioByIdUseCase.execute(id)
@@ -55,12 +69,16 @@ public class UsuarioController {
         );
     }
 
+    @Operation(summary = "Listar fincas de un usuario con paginación")
+    @ApiResponse(responseCode = "200", description = "Lista paginada de fincas")
+    @ApiResponse(responseCode = "400", description = "Parámetros de paginación inválidos")
+    @ApiResponse(responseCode = "404", description = "Usuario no existe")
     @GetMapping("/{id}/fincas")
     public ResponseEntity<PageResponse<FincaResponse>> getFincasByUsuario(
-            @PathVariable @Min(1) Long id,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
-
+            @Parameter(description = "ID del usuario", example = "5") @PathVariable @Min(1) Long id,
+            @Parameter(description = "Número de página (base 0)", example = "0") @RequestParam(defaultValue = "0") @Min(0) int page,
+            @Parameter(description = "Elementos por página (máx 100)", example = "10") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
+    ) {
         return ResponseEntity.ok(
                 fincaResponseMapper.toPageResponse(
                         getFincasByUsuarioIdUseCase.execute(id, page, size)
@@ -68,9 +86,14 @@ public class UsuarioController {
         );
     }
 
+    @Operation(summary = "Eliminar un usuario")
+    @ApiResponse(responseCode = "204", description = "Usuario eliminado")
+    @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> delete(@PathVariable @Min(1) Long id) {
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "ID del usuario", example = "5") @PathVariable @Min(1) Long id
+    ) {
         deleteUsuarioByIdUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
