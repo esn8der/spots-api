@@ -4,6 +4,7 @@ import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.fixtures.LoteFixtures;
@@ -20,7 +21,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,15 +45,16 @@ class GetLotesByFincaIdUseCaseTest {
         void shouldThrowExceptionWhenFincaDoesNotExist() {
             // GIVEN: La finca NO existe
             givenFincaExists(false);
+            PaginationParams params = paginationParams();
 
             // WHEN + THEN: Debe lanzar excepción y NO consultar lotes
             assertThrows(
                     FincaNotFoundException.class,
-                    () -> useCase.execute(LoteFixtures.FINCA_ID, 0, 10),
+                    () -> useCase.execute(LoteFixtures.FINCA_ID, params),
                     "Debe lanzar excepción cuando la finca no existe"
             );
 
-            verify(loteRepository, never()).findAllByFincaId(anyLong(), anyInt(), anyInt());
+            verify(loteRepository, never()).findAllByFincaId(anyLong(), eq(params));
         }
     }
 
@@ -66,15 +67,16 @@ class GetLotesByFincaIdUseCaseTest {
         void shouldReturnEmptyPageResultWhenFincaHasNoLotes() {
             // GIVEN: La finca existe pero no tiene lotes
             givenFincaExists(true);
+            PaginationParams params = paginationParams();
             PageResult<Lote> emptyPage = new PageResult<>(List.of(), 0, 10, 0L, 0);
-            when(loteRepository.findAllByFincaId(LoteFixtures.FINCA_ID, 0, 10))
+            when(loteRepository.findAllByFincaId(LoteFixtures.FINCA_ID, params))
                     .thenReturn(emptyPage);
 
             // WHEN: Ejecutamos el caso de uso
-            PageResult<Lote> result = useCase.execute(LoteFixtures.FINCA_ID, 0, 10);
+            PageResult<Lote> result = useCase.execute(LoteFixtures.FINCA_ID, params);
 
             // THEN: Verifica que se consultó el repositorio y el resultado es un PageResult vacío
-            verify(loteRepository).findAllByFincaId(LoteFixtures.FINCA_ID, 0, 10);
+            verify(loteRepository).findAllByFincaId(LoteFixtures.FINCA_ID, params);
             verifyNoMoreInteractions(loteRepository);
             assertTrue(result.content().isEmpty(), "Debe retornar contenido vacío cuando no hay lotes");
             assertEquals(0, result.totalElements(), "Total de elementos debe ser 0");
@@ -86,16 +88,17 @@ class GetLotesByFincaIdUseCaseTest {
         void shouldReturnPageResultWithLotesWhenFincaHasLotes() {
             // GIVEN: La finca existe y tiene lotes
             givenFincaExists(true);
+            PaginationParams params = paginationParams();
             List<Lote> expectedLotes = List.of(LoteFixtures.anyLote());
             PageResult<Lote> expectedPage = new PageResult<>(expectedLotes, 0, 10, 1L, 1);
-            when(loteRepository.findAllByFincaId(LoteFixtures.FINCA_ID, 0, 10))
+            when(loteRepository.findAllByFincaId(LoteFixtures.FINCA_ID, params))
                     .thenReturn(expectedPage);
 
             // WHEN: Ejecutamos el caso de uso
-            PageResult<Lote> result = useCase.execute(LoteFixtures.FINCA_ID, 0, 10);
+            PageResult<Lote> result = useCase.execute(LoteFixtures.FINCA_ID, params);
 
             // THEN: Verifica que se consultó el repositorio y se retornó el PageResult esperado
-            verify(loteRepository).findAllByFincaId(LoteFixtures.FINCA_ID, 0, 10);
+            verify(loteRepository).findAllByFincaId(LoteFixtures.FINCA_ID, params);
             assertEquals(expectedLotes, result.content(), "Debe retornar exactamente los lotes de la finca");
             assertEquals(1, result.totalElements(), "Total de elementos debe ser 1");
             assertEquals(1, result.totalPages(), "Total de páginas debe ser 1");
@@ -108,15 +111,16 @@ class GetLotesByFincaIdUseCaseTest {
         void shouldPassPaginationParamsToRepository() {
             // GIVEN: La finca existe
             givenFincaExists(true);
+            PaginationParams params = new PaginationParams(2, 5, "id", "asc");
             PageResult<Lote> anyPage = new PageResult<>(List.of(), 2, 5, 0L, 0);
-            when(loteRepository.findAllByFincaId(LoteFixtures.FINCA_ID, 2, 5))
+            when(loteRepository.findAllByFincaId(LoteFixtures.FINCA_ID, params))
                     .thenReturn(anyPage);
 
             // WHEN: Ejecutamos con página=2, tamaño=5
-            useCase.execute(LoteFixtures.FINCA_ID, 2, 5);
+            useCase.execute(LoteFixtures.FINCA_ID, params);
 
             // THEN: Verifica que los parámetros se propagaron correctamente al repositorio
-            verify(loteRepository).findAllByFincaId(LoteFixtures.FINCA_ID, 2, 5);
+            verify(loteRepository).findAllByFincaId(LoteFixtures.FINCA_ID, params);
         }
     }
 
@@ -126,5 +130,9 @@ class GetLotesByFincaIdUseCaseTest {
                 ? Optional.of(mock(Finca.class))
                 : Optional.empty();
         when(fincaRepository.findById(LoteFixtures.FINCA_ID)).thenReturn(finca);
+    }
+
+    private PaginationParams paginationParams() {
+        return new PaginationParams(0, 10, "id", "asc");
     }
 }

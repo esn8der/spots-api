@@ -4,11 +4,11 @@ import com.sioma.spotsapi.application.usecase.CreateUsuarioUseCase;
 import com.sioma.spotsapi.application.usecase.DeleteUsuarioByIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetFincasByUsuarioIdUseCase;
 import com.sioma.spotsapi.application.usecase.GetUsuarioByIdUseCase;
-import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.exception.UsuarioAlreadyExistsException;
 import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.PageResponse;
@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -135,10 +134,11 @@ class UsuarioControllerTest {
             // GIVEN
             List<Finca> domainFincas = List.of(new Finca(1L, "Finca Norte", 10L));
             List<FincaResponse> dtoFincas = List.of(new FincaResponse(1L, "Finca Norte"));
+            PaginationParams params = paginationParams();
             PageResult<Finca> pageResult = new PageResult<>(domainFincas, 0, 10, 1L, 1);
             PageResponse<FincaResponse> pageResponse = new PageResponse<>(dtoFincas, 0, 10, 1L, 1);
 
-            when(getFincasByUsuarioIdUseCase.execute(anyLong(), anyInt(), anyInt())).thenReturn(pageResult);
+            when(getFincasByUsuarioIdUseCase.execute(anyLong(), eq(params))).thenReturn(pageResult);
             when(fincaResponseMapper.toPageResponse(any())).thenReturn(pageResponse);
 
             // WHEN & THEN
@@ -153,10 +153,13 @@ class UsuarioControllerTest {
         @Test
         @DisplayName("404 Not Found cuando el usuario no existe")
         void shouldReturn404WhenUsuarioDoesNotExistForFincas() throws Exception {
-            when(getFincasByUsuarioIdUseCase.execute(anyLong(), anyInt(), anyInt()))
-                    .thenThrow(new FincaNotFoundException(10L));
+            // GIVEN
+            Long usuarioId = 999L;
+            when(getFincasByUsuarioIdUseCase.execute(eq(usuarioId), any(PaginationParams.class)))
+                    .thenThrow(new UsuarioNotFoundException(usuarioId));
 
-            mockMvc.perform(get("/usuarios/10/fincas"))
+            // WHEN & THEN
+            mockMvc.perform(get("/usuarios/{id}/fincas", usuarioId))
                     .andExpect(status().isNotFound());
         }
     }
@@ -183,5 +186,9 @@ class UsuarioControllerTest {
             mockMvc.perform(delete("/usuarios/5"))
                     .andExpect(status().isNotFound());
         }
+    }
+
+    private PaginationParams paginationParams() {
+        return new PaginationParams(0, 10, "id", "asc");
     }
 }

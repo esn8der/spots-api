@@ -9,6 +9,7 @@ import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.fixtures.LoteFixtures;
 import com.sioma.spotsapi.web.dto.FincaResponse;
 import com.sioma.spotsapi.web.dto.LoteResponse;
@@ -27,7 +28,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -162,11 +162,12 @@ class FincaControllerTest {
             // GIVEN
             List<Lote> domainLotes = List.of(LoteFixtures.anyLote());
             List<LoteResponse> dtoLotes = List.of(new LoteResponse(1L, "Lote A"));
+            PaginationParams params = paginationParams();
             PageResult<Lote> pageResult = new PageResult<>(domainLotes, 0, 10, 1L, 1);
             PageResponse<LoteResponse> pageResponse = new PageResponse<>(dtoLotes, 0, 10, 1L, 1);
 
             // Usamos any() para evitar que un mismatch de parámetros retorne null → 500
-            when(getLotesByFincaIdUseCase.execute(anyLong(), anyInt(), anyInt())).thenReturn(pageResult);
+            when(getLotesByFincaIdUseCase.execute(anyLong(), eq(params))).thenReturn(pageResult);
             when(loteResponseMapper.toPageResponse(any())).thenReturn(pageResponse);
 
             // WHEN & THEN
@@ -182,10 +183,11 @@ class FincaControllerTest {
         @Test
         @DisplayName("200 OK con PageResponse vacío cuando no hay lotes")
         void shouldReturn200WithEmptyPageResponseWhenNoLotes() throws Exception {
+            PaginationParams params = paginationParams();
             PageResult<Lote> emptyPage = new PageResult<>(List.of(), 0, 10, 0L, 0);
             PageResponse<LoteResponse> emptyResponse = new PageResponse<>(List.of(), 0, 10, 0L, 0);
 
-            when(getLotesByFincaIdUseCase.execute(anyLong(), anyInt(), anyInt())).thenReturn(emptyPage);
+            when(getLotesByFincaIdUseCase.execute(anyLong(), eq(params))).thenReturn(emptyPage);
             when(loteResponseMapper.toPageResponse(any())).thenReturn(emptyResponse);
 
             mockMvc.perform(get("/fincas/5/lotes"))
@@ -222,10 +224,13 @@ class FincaControllerTest {
         @Test
         @DisplayName("404 Not Found cuando la finca no existe")
         void shouldReturn404WhenFincaDoesNotExistForLotes() throws Exception {
-            when(getLotesByFincaIdUseCase.execute(anyLong(), anyInt(), anyInt()))
-                    .thenThrow(new FincaNotFoundException(5L));
+            // GIVEN
+            Long fincaID = 999L;
+            when(getLotesByFincaIdUseCase.execute(eq(fincaID), any(PaginationParams.class)))
+                    .thenThrow(new FincaNotFoundException(fincaID));
 
-            mockMvc.perform(get("/fincas/5/lotes"))
+            // WHEN & THEN
+            mockMvc.perform(get("/fincas/{id}/lotes", fincaID))
                     .andExpect(status().isNotFound());
         }
     }
@@ -250,5 +255,9 @@ class FincaControllerTest {
             mockMvc.perform(delete("/fincas/5"))
                     .andExpect(status().isNotFound());
         }
+    }
+
+    private PaginationParams paginationParams() {
+        return new PaginationParams(0, 10, "id", "asc");
     }
 }

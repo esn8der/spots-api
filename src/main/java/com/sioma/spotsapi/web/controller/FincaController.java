@@ -1,5 +1,8 @@
 package com.sioma.spotsapi.web.controller;
 
+import com.sioma.spotsapi.domain.model.Lote;
+import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.web.dto.PageResponse;
 import com.sioma.spotsapi.web.mapper.FincaResponseMapper;
 import com.sioma.spotsapi.web.mapper.LoteResponseMapper;
@@ -74,13 +77,14 @@ public class FincaController {
     public ResponseEntity<PageResponse<LoteResponse>> getLotesByFinca(
             @Parameter(description = "ID de la finca", example = "5") @PathVariable @Min(1) Long id,
             @Parameter(description = "Número de página (base 0)", example = "0") @RequestParam(defaultValue = "0") @Min(0) int page,
-            @Parameter(description = "Elementos por página (máx 100)", example = "10") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
+            @Parameter(description = "Elementos por página (máx 100)", example = "10") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+            @Parameter(description = "Campo de ordenamiento", example = "nombre") @RequestParam(defaultValue = "nombre") String sortBy,
+            @Parameter(description = "Dirección de ordenamiento", example = "asc") @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        return ResponseEntity.ok(
-                loteResponseMapper.toPageResponse(
-                        getLotesByFincaIdUseCase.execute(id, page, size)
-                )
-        );
+        PaginationParams params = PaginationParams.of(page, size, sortBy, sortDir);
+        PageResult<Lote> lotePage = getLotesByFincaIdUseCase.execute(id, params);
+
+        return ResponseEntity.ok(loteResponseMapper.toPageResponse(lotePage));
     }
 
     @Operation(summary = "Eliminar una finca")

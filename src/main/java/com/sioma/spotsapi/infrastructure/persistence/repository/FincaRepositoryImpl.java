@@ -2,6 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entity.FincaEntity;
 import com.sioma.spotsapi.infrastructure.persistence.mapper.FincaEntityMapper;
@@ -45,8 +46,10 @@ public class FincaRepositoryImpl implements FincaRepository {
     }
 
     @Override
-    public PageResult<Finca> findAllByUsuarioId(Long usuarioId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
+    public PageResult<Finca> findAllByUsuarioId(Long usuarioId, PaginationParams params) {
+        Sort sort = Sort.by(Sort.Direction.fromString(params.sortDir()), params.sortBy());
+        Pageable pageable = PageRequest.of(params.page(), params.size(), sort);
+
         Page<FincaEntity> pageResult = jpaRepository.findAllByUsuarioId(usuarioId, pageable);
         List<Finca> fincas = pageResult.getContent()
                 .stream()

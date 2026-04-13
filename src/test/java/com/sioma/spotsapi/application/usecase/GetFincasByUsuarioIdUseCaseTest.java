@@ -3,6 +3,7 @@ package com.sioma.spotsapi.application.usecase;
 import com.sioma.spotsapi.domain.exception.UsuarioNotFoundException;
 import com.sioma.spotsapi.domain.model.Finca;
 import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.domain.model.Usuario;
 import com.sioma.spotsapi.domain.repository.FincaRepository;
 import com.sioma.spotsapi.domain.repository.UsuarioRepository;
@@ -20,7 +21,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,15 +45,16 @@ class GetFincasByUsuarioIdUseCaseTest {
         void shouldThrowExceptionWhenUsuarioDoesNotExist() {
             // GIVEN: El usuario NO existe
             givenUsuarioExists(false);
+            PaginationParams params = paginationParams();
 
             // WHEN + THEN: Debe lanzar excepción y NO consultar fincas
             assertThrows(
                     UsuarioNotFoundException.class,
-                    () -> useCase.execute(FincaFixtures.USUARIO_ID, 0, 10),
+                    () -> useCase.execute(FincaFixtures.USUARIO_ID, params),
                     "Debe lanzar excepción cuando el usuario no existe"
             );
 
-            verify(fincaRepository, never()).findAllByUsuarioId(anyLong(), anyInt(), anyInt());
+            verify(fincaRepository, never()).findAllByUsuarioId(anyLong(), eq(params));
         }
     }
 
@@ -66,15 +67,16 @@ class GetFincasByUsuarioIdUseCaseTest {
         void shouldReturnEmptyPageResultWhenUsuarioHasNoFincas() {
             // GIVEN: El usuario existe pero no tiene fincas
             givenUsuarioExists(true);
+            PaginationParams params = paginationParams();
             PageResult<Finca> emptyPage = new PageResult<>(List.of(), 0, 10, 0L, 0);
-            when(fincaRepository.findAllByUsuarioId(FincaFixtures.USUARIO_ID, 0, 10))
+            when(fincaRepository.findAllByUsuarioId(FincaFixtures.USUARIO_ID, params))
                     .thenReturn(emptyPage);
 
             // WHEN: Ejecutamos el caso de uso
-            PageResult<Finca> result = useCase.execute(FincaFixtures.USUARIO_ID, 0, 10);
+            PageResult<Finca> result = useCase.execute(FincaFixtures.USUARIO_ID, params);
 
             // THEN: Verifica que se consultó el repositorio y el resultado es un PageResult vacío
-            verify(fincaRepository).findAllByUsuarioId(FincaFixtures.USUARIO_ID, 0, 10);
+            verify(fincaRepository).findAllByUsuarioId(FincaFixtures.USUARIO_ID, params);
             verifyNoMoreInteractions(fincaRepository);
             assertTrue(result.content().isEmpty(), "Debe retornar contenido vacío cuando no hay fincas");
             assertEquals(0, result.totalElements(), "Total de elementos debe ser 0");
@@ -86,18 +88,17 @@ class GetFincasByUsuarioIdUseCaseTest {
         void shouldReturnPageResultWithFincasWhenUsuarioHasFincas() {
             // GIVEN: El usuario existe y tiene fincas
             givenUsuarioExists(true);
-            List<Finca> expectedFincas = List.of(
-                    new Finca(1L, FincaFixtures.NOMBRE, FincaFixtures.USUARIO_ID)
-            );
+            PaginationParams params = paginationParams();
+            List<Finca> expectedFincas = List.of(new Finca(1L, FincaFixtures.NOMBRE, FincaFixtures.USUARIO_ID));
             PageResult<Finca> expectedPage = new PageResult<>(expectedFincas, 0, 10, 1L, 1);
-            when(fincaRepository.findAllByUsuarioId(FincaFixtures.USUARIO_ID, 0, 10))
+            when(fincaRepository.findAllByUsuarioId(FincaFixtures.USUARIO_ID, params))
                     .thenReturn(expectedPage);
 
             // WHEN: Ejecutamos el caso de uso
-            PageResult<Finca> result = useCase.execute(FincaFixtures.USUARIO_ID, 0, 10);
+            PageResult<Finca> result = useCase.execute(FincaFixtures.USUARIO_ID, params);
 
             // THEN: Verifica que se consultó el repositorio y se retornó el PageResult esperado
-            verify(fincaRepository).findAllByUsuarioId(FincaFixtures.USUARIO_ID, 0, 10);
+            verify(fincaRepository).findAllByUsuarioId(FincaFixtures.USUARIO_ID, params);
             assertEquals(expectedFincas, result.content(), "Debe retornar exactamente las fincas del usuario");
             assertEquals(1, result.totalElements(), "Total de elementos debe ser 1");
             assertEquals(1, result.totalPages(), "Total de páginas debe ser 1");
@@ -110,24 +111,28 @@ class GetFincasByUsuarioIdUseCaseTest {
         void shouldPassPaginationParamsToRepository() {
             // GIVEN: El usuario existe
             givenUsuarioExists(true);
+            PaginationParams params = paginationParams();
             PageResult<Finca> anyPage = new PageResult<>(List.of(), 2, 5, 0L, 0);
-            when(fincaRepository.findAllByUsuarioId(FincaFixtures.USUARIO_ID, 2, 5))
+            when(fincaRepository.findAllByUsuarioId(FincaFixtures.USUARIO_ID, params))
                     .thenReturn(anyPage);
 
             // WHEN: Ejecutamos con página=2, tamaño=5
-            useCase.execute(FincaFixtures.USUARIO_ID, 2, 5);
+            useCase.execute(FincaFixtures.USUARIO_ID, params);
 
             // THEN: Verifica que los parámetros se propagaron correctamente al repositorio
-            verify(fincaRepository).findAllByUsuarioId(FincaFixtures.USUARIO_ID, 2, 5);
+            verify(fincaRepository).findAllByUsuarioId(FincaFixtures.USUARIO_ID, params);
         }
     }
 
     // ===== Helpers BDD =====
-
     private void givenUsuarioExists(boolean exists) {
         Optional<Usuario> usuario = exists
                 ? Optional.of(mock(Usuario.class))
                 : Optional.empty();
         when(usuarioRepository.findById(FincaFixtures.USUARIO_ID)).thenReturn(usuario);
+    }
+
+    private PaginationParams paginationParams() {
+        return new PaginationParams(0, 10, "id", "asc");
     }
 }

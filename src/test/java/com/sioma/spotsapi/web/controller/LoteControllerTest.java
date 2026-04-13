@@ -1,17 +1,18 @@
 package com.sioma.spotsapi.web.controller;
 
-import com.sioma.spotsapi.application.usecase.CreateLoteUseCase;
-import com.sioma.spotsapi.application.usecase.DeleteLoteByIdUseCase;
-import com.sioma.spotsapi.application.usecase.GetLoteByIdUseCase;
-import com.sioma.spotsapi.application.usecase.UpdateLoteUseCase;
+import com.sioma.spotsapi.application.usecase.*;
 import com.sioma.spotsapi.domain.exception.FincaNotFoundException;
 import com.sioma.spotsapi.domain.exception.LoteAlreadyExistsException;
 import com.sioma.spotsapi.domain.exception.LoteNotFoundException;
 import com.sioma.spotsapi.domain.exception.PlantaNotFoundException;
-import com.sioma.spotsapi.domain.model.Lote;
+import com.sioma.spotsapi.domain.model.*;
 import com.sioma.spotsapi.fixtures.LoteFixtures;
+import com.sioma.spotsapi.fixtures.SpotFixtures;
 import com.sioma.spotsapi.web.dto.LoteResponse;
+import com.sioma.spotsapi.web.dto.PageResponse;
+import com.sioma.spotsapi.web.dto.SpotResponse;
 import com.sioma.spotsapi.web.mapper.LoteResponseMapper;
+import com.sioma.spotsapi.web.mapper.SpotResponseMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,11 @@ class LoteControllerTest {
     @MockitoBean
     private UpdateLoteUseCase updateLoteUseCase;
     @MockitoBean
+    private GetSpotsByLoteIdUseCase getSpotsByLoteIdUseCase;
+    @MockitoBean
     private LoteResponseMapper loteResponseMapper;
+    @MockitoBean
+    private SpotResponseMapper spotResponseMapper;
 
     @Nested
     @DisplayName("POST /lotes - Crear lote con geocerca GeoJSON")
@@ -242,6 +247,126 @@ class LoteControllerTest {
                     .andExpect(status().isBadRequest());
 
             verifyNoInteractions(getLoteByIdUseCase);
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /lotes/{id}/spots - Paginación")
+    class GetSpotsByLotePaginated {
+
+        @Test
+        @DisplayName("200 OK con PageResponse cuando hay spots")
+        void shouldReturn200WithPageResponseWhenSpotsExist() throws Exception {
+            // GIVEN
+            Long loteId = 5L;
+            List<Spot> domainSpots = List.of(
+                    new Spot(10L, SpotFixtures.validPoint(), loteId, new SpotPosition(1, 1)),
+                    new Spot(11L, SpotFixtures.validPoint(), loteId, new SpotPosition(1, 2))
+            );
+            List<SpotResponse> dtoSpots = List.of(
+                    new SpotResponse(10L, loteId, 1, 1, SpotFixtures.validCoordinates()),
+                    new SpotResponse(11L, loteId, 1, 2, SpotFixtures.validCoordinates())
+            );
+            PageResult<Spot> pageResult = new PageResult<>(domainSpots, 0, 20, 2L, 1);
+            PageResponse<SpotResponse> pageResponse = new PageResponse<>(dtoSpots, 0, 20, 2L, 1);
+
+            when(getSpotsByLoteIdUseCase.execute(eq(loteId), any(PaginationParams.class))).thenReturn(pageResult);
+            when(spotResponseMapper.toPageResponse(any())).thenReturn(pageResponse);
+
+            // WHEN & THEN
+            mockMvc.perform(get("/lotes/{id}/spots", loteId)
+                            .param("page", "0")
+                            .param("size", "20")
+                            .param("sortBy", "linea")
+                            .param("sortDir", "asc"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content[0].id").value(10))
+                    .andExpect(jsonPath("$.content[0].coordenada[0]").value(-73.647243))
+                    .andExpect(jsonPath("$.content[0].loteId").value(loteId))
+                    .andExpect(jsonPath("$.content[0].linea").value(1))
+                    .andExpect(jsonPath("$.content[0].posicion").value(1))
+                    .andExpect(jsonPath("$.totalElements").value(2))
+                    .andExpect(jsonPath("$.totalPages").value(1));
+
+            verify(getSpotsByLoteIdUseCase).execute(eq(loteId), any(PaginationParams.class));
+            verify(spotResponseMapper).toPageResponse(pageResult);
+        }
+
+        @Test
+        @DisplayName("200 OK con PageResponse vacío cuando no hay spots")
+        void shouldReturn200WithEmptyPageResponseWhenNoSpots() throws Exception {
+            // GIVEN
+            Long loteId = 5L;
+            PageResult<Spot> emptyPage = new PageResult<>(List.of(), 0, 20, 0L, 0);
+            PageResponse<SpotResponse> emptyResponse = new PageResponse<>(List.of(), 0, 20, 0L, 0);
+
+            when(getSpotsByLoteIdUseCase.execute(eq(loteId), any(PaginationParams.class))).thenReturn(emptyPage);
+            when(spotResponseMapper.toPageResponse(any())).thenReturn(emptyResponse);
+
+            // WHEN & THEN
+            mockMvc.perform(get("/lotes/{id}/spots", loteId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isEmpty())
+                    .andExpect(jsonPath("$.totalElements").value(0));
+
+            verify(getSpotsByLoteIdUseCase).execute(eq(loteId), any(PaginationParams.class));
+        }
+
+        @Test
+        @DisplayName("400 Bad Request cuando page es negativo")
+        void shouldReturn400WhenPageIsNegative() throws Exception {
+            // WHEN & THEN
+            mockMvc.perform(get("/lotes/5/spots").param("page", "-1"))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(getSpotsByLoteIdUseCase);
+        }
+
+        @Test
+        @DisplayName("400 Bad Request cuando size es menor a 1")
+        void shouldReturn400WhenSizeIsLessThanOne() throws Exception {
+            // WHEN & THEN
+            mockMvc.perform(get("/lotes/5/spots").param("size", "0"))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(getSpotsByLoteIdUseCase);
+        }
+
+        @Test
+        @DisplayName("400 Bad Request cuando size excede el máximo permitido")
+        void shouldReturn400WhenSizeExceedsMaximum() throws Exception {
+            // WHEN & THEN
+            mockMvc.perform(get("/lotes/5/spots").param("size", "101"))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(getSpotsByLoteIdUseCase);
+        }
+
+        @Test
+        @DisplayName("404 Not Found cuando el lote no existe")
+        void shouldReturn404WhenLoteDoesNotExist() throws Exception {
+            // GIVEN
+            Long loteId = 999L;
+            when(getSpotsByLoteIdUseCase.execute(eq(loteId), any(PaginationParams.class)))
+                    .thenThrow(new LoteNotFoundException(loteId));
+
+            // WHEN & THEN
+            mockMvc.perform(get("/lotes/{id}/spots", loteId))
+                    .andExpect(status().isNotFound());
+
+            verify(getSpotsByLoteIdUseCase).execute(eq(loteId), any(PaginationParams.class));
+        }
+
+        @Test
+        @DisplayName("400 Bad Request cuando el ID del lote no es numérico")
+        void shouldReturn400WhenLoteIdIsNotNumeric() throws Exception {
+            // WHEN & THEN
+            mockMvc.perform(get("/lotes/abc/spots"))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(getSpotsByLoteIdUseCase);
         }
     }
 

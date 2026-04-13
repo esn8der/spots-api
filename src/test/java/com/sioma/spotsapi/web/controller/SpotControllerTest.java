@@ -59,7 +59,7 @@ class SpotControllerTest {
             Point point = SpotFixtures.validPoint();
             SpotPosition spotPosition = new SpotPosition(1, 1);
             Spot domainSpot = new Spot(10L, point, 1L, spotPosition);
-            SpotResponse responseDto = new SpotResponse(10L, 1, 1);
+            SpotResponse responseDto = new SpotResponse(10L, 1L, spotPosition.linea(), spotPosition.posicion(), coordinates);
 
             when(createSpotUseCase.execute(coordinates, 1L, 1, 1)).thenReturn(domainSpot);
             when(spotResponseMapper.toResponse(any(Spot.class))).thenReturn(responseDto);
@@ -180,9 +180,10 @@ class SpotControllerTest {
         void shouldReturn200WhenSpotExists() throws Exception {
             // GIVEN
             Point point = SpotFixtures.validPoint();
+            List<Double> coordinates = SpotFixtures.validCoordinates();
             SpotPosition spotPosition = new SpotPosition(1, 1);
             Spot domainSpot = new Spot(5L, point, 1L, spotPosition);
-            SpotResponse responseDto = new SpotResponse(5L, 1, 1);
+            SpotResponse responseDto = new SpotResponse(5L, 1L, spotPosition.linea(), spotPosition.posicion(), coordinates);
 
             when(getSpotByIdUseCase.execute(5L)).thenReturn(domainSpot);
             when(spotResponseMapper.toResponse(any(Spot.class))).thenReturn(responseDto);

@@ -2,6 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.fixtures.LoteFixtures;
 import com.sioma.spotsapi.fixtures.PlantaFixtures;
 import com.sioma.spotsapi.fixtures.FincaFixtures;
@@ -35,13 +36,10 @@ class LoteRepositoryImplTest {
 
     @Autowired
     private LoteJpaRepository jpaRepository;
-
     @Autowired
     private UsuarioJpaRepository usuarioRepository;
-
     @Autowired
     private FincaJpaRepository fincaRepository;
-
     @Autowired
     private PlantaJpaRepository plantaRepository;
 
@@ -82,6 +80,7 @@ class LoteRepositoryImplTest {
         }
 
     }
+
     @Nested
     @DisplayName("findById()")
     class FindById {
@@ -132,22 +131,24 @@ class LoteRepositoryImplTest {
             // GIVEN
             TestData data = createBaseData();
             Polygon geocerca = LoteFixtures.anyGeocerca();
+            PaginationParams params = new PaginationParams(0, 2, "nombre", "asc");
+
             jpaRepository.save(new LoteEntity("Lote A", geocerca, data.fincaId(), data.plantaId()));
             jpaRepository.save(new LoteEntity("Lote B", geocerca, data.fincaId(), data.plantaId()));
             jpaRepository.save(new LoteEntity("Lote C", geocerca, data.fincaId(), data.plantaId()));
 
             // WHEN
-            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), 0, 2);
+            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), params);
 
             // THEN
-            assertEquals(2, resultado.content().size(), "Debe retornar 2 elementos por página");
-            assertEquals(0, resultado.page(), "Debe ser la página 0");
-            assertEquals(2, resultado.size(), "El tamaño de página debe ser 2");
+            assertEquals(params.size(), resultado.content().size(), "Debe retornar 2 elementos por página");
+            assertEquals(params.page(), resultado.page(), "Debe ser la página 0");
+            assertEquals(params.size(), resultado.size(), "El tamaño de página debe ser 2");
             assertEquals(3, resultado.totalElements(), "Debe haber 3 elementos en total");
             assertEquals(2, resultado.totalPages(), "Debe haber 2 páginas en total");
             assertFalse(resultado.content().isEmpty(), "No debe estar vacío");
 
-            // Verificar ordenamiento por nombre (asc por defecto en JPA)
+            // Verificar ordenamiento por nombre (asc)
             assertEquals("Lote A", resultado.content().get(0).getNombre(),
                     "Primer elemento debe ser 'Lote A'");
             assertEquals("Lote B", resultado.content().get(1).getNombre(),
@@ -159,9 +160,10 @@ class LoteRepositoryImplTest {
         void shouldReturnEmptyPageResultWhenNoLotesForFinca() {
             // GIVEN
             TestData data = createBaseData();
+            PaginationParams params = paginationParams();
 
             // WHEN
-            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), 0, 10);
+            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), params);
 
             // THEN
             assertTrue(resultado.content().isEmpty(), "Debe retornar contenido vacío");
@@ -175,10 +177,11 @@ class LoteRepositoryImplTest {
             // GIVEN
             TestData data = createBaseData();
             Polygon geocerca = LoteFixtures.anyGeocerca();
+            PaginationParams params = new PaginationParams(999, 10, "id", "asc");
             jpaRepository.save(new LoteEntity("Lote Único", geocerca, data.fincaId(), data.plantaId()));
 
             // WHEN
-            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), 999, 10);
+            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), params);
 
             // THEN
             assertTrue(resultado.content().isEmpty(), "Debe retornar contenido vacío para página fuera de rango");
@@ -190,7 +193,8 @@ class LoteRepositoryImplTest {
         @DisplayName("maneja finca inexistente retornando PageResult vacío")
         void shouldHandleNonExistentFincaReturningEmptyPageResult() {
             // WHEN
-            PageResult<Lote> resultado = repository.findAllByFincaId(99999L, 0, 10);
+            PaginationParams params = paginationParams();
+            PageResult<Lote> resultado = repository.findAllByFincaId(99999L, params);
 
             // THEN
             assertTrue(resultado.content().isEmpty(), "Debe retornar contenido vacío para finca inexistente");
@@ -203,16 +207,18 @@ class LoteRepositoryImplTest {
             // GIVEN
             TestData data = createBaseData();
             Polygon geocerca = LoteFixtures.anyGeocerca();
+            PaginationParams params = new PaginationParams(1, 10, "id", "asc");
+
             for (int i = 1; i <= 25; i++) {
                 jpaRepository.save(new LoteEntity("Lote-" + String.format("%02d", i), geocerca, data.fincaId(), data.plantaId()));
             }
 
             // WHEN: Página 1 (base 0) con tamaño 10 → elementos 10-19
-            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), 1, 10);
+            PageResult<Lote> resultado = repository.findAllByFincaId(data.fincaId(), params);
 
             // THEN
-            assertEquals(10, resultado.content().size(), "Debe retornar 10 elementos por página");
-            assertEquals(1, resultado.page(), "Debe ser la página 1 (base 0)");
+            assertEquals(params.size(), resultado.content().size(), "Debe retornar 10 elementos por página");
+            assertEquals(params.page(), resultado.page(), "Debe ser la página 1 (base 0)");
             assertEquals(25, resultado.totalElements(), "Total debe ser 25");
             assertEquals(3, resultado.totalPages(), "Debe haber 3 páginas en total");
             assertEquals("Lote-11", resultado.content().getFirst().getNombre(),
@@ -224,6 +230,7 @@ class LoteRepositoryImplTest {
         void shouldReturnOnlyLotesFromRequestedFinca() {
             // GIVEN: Dos fincas con lotes diferentes
             TestData data1 = createBaseData();
+            PaginationParams params = paginationParams();
 
             UsuarioEntity usuario2 = usuarioRepository.save(
                     new UsuarioEntity(UsuarioFixtures.NOMBRE, UsuarioFixtures.uniqueEmail(), UsuarioFixtures.PASSWORD)
@@ -246,7 +253,7 @@ class LoteRepositoryImplTest {
             jpaRepository.save(new LoteEntity("Lote C", geocerca, data2.fincaId(), data2.plantaId()));
 
             // WHEN
-            PageResult<Lote> resultado = repository.findAllByFincaId(data1.fincaId(), 0, 10);
+            PageResult<Lote> resultado = repository.findAllByFincaId(data1.fincaId(), params);
 
             // THEN
             assertEquals(2, resultado.content().size(), "Debe retornar exactamente 2 lotes para finca1");
@@ -323,6 +330,7 @@ class LoteRepositoryImplTest {
         }
 
     }
+
     @Nested
     @DisplayName("deleteById()")
     class DeleteById {
@@ -354,6 +362,7 @@ class LoteRepositoryImplTest {
         }
 
     }
+
     // Helper para crear datos base (sin estado compartido entre tests)
     private @NonNull TestData createBaseData() {
         UsuarioEntity usuario = usuarioRepository.save(
@@ -369,5 +378,10 @@ class LoteRepositoryImplTest {
     }
 
     // Record inmutable para datos de test (evita variables de instancia compartidas)
-    private record TestData(Long usuarioId, Long fincaId, Long plantaId) {}
+    private record TestData(Long usuarioId, Long fincaId, Long plantaId) {
+    }
+
+    private PaginationParams paginationParams() {
+        return new PaginationParams(0, 10, "id", "asc");
+    }
 }

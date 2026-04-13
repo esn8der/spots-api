@@ -2,6 +2,7 @@ package com.sioma.spotsapi.infrastructure.persistence.repository;
 
 import com.sioma.spotsapi.domain.model.Lote;
 import com.sioma.spotsapi.domain.model.PageResult;
+import com.sioma.spotsapi.domain.model.PaginationParams;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
 import com.sioma.spotsapi.infrastructure.persistence.entity.LoteEntity;
 import com.sioma.spotsapi.infrastructure.persistence.mapper.LoteEntityMapper;
@@ -34,8 +35,10 @@ public class LoteRepositoryImpl implements LoteRepository {
     }
 
     @Override
-    public PageResult<Lote> findAllByFincaId(Long fincaId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
+    public PageResult<Lote> findAllByFincaId(Long fincaId, PaginationParams params) {
+        Sort sort = Sort.by(Sort.Direction.fromString(params.sortDir()), params.sortBy());
+        Pageable pageable = PageRequest.of(params.page(), params.size(), sort);
+
         Page<LoteEntity> pageResult = jpaRepository.findAllByFincaId(fincaId, pageable);
         List<Lote> lotes = pageResult.getContent()
                 .stream()
