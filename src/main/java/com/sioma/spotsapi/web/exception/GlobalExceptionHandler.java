@@ -190,24 +190,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
-        String message = ex.getMostSpecificCause().getMessage();
+        log.warn("Violación de integridad de datos (fallback): {}", ex.getMostSpecificCause().getMessage());
 
-        log.warn("Error de integridad de datos: {}", message);
-
-        if (message != null && message.contains("idx_spot_lote_geo_unique")) {
-
-            ErrorResponse error = new ErrorResponse(
-                    HttpStatus.CONFLICT.value(),
-                    "Ya existe un spot en esa ubicación",
-                    "SPOT_DUPLICATE_LOCATION"
-            );
-
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
-        }
-
+        // Fallback genérico para violaciones no manejadas explícitamente
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
-                "Violación de integridad de datos",
+                "Conflicto de datos: la operación violó una restricción de integridad",
                 "DATA_INTEGRITY_VIOLATION"
         );
 
