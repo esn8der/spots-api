@@ -42,7 +42,7 @@ public class LoggingInterceptor implements HandlerInterceptor, AsyncHandlerInter
     public void afterCompletion(@NonNull HttpServletRequest request,
                                 @NonNull HttpServletResponse response,
                                 @NonNull Object handler, Exception ex) {
-        // ✅ Limpieza CRÍTICA: evitar memory leaks (ThreadLocal)
+        // Limpieza CRÍTICA: evitar memory leaks (ThreadLocal)
         log.debug("Finalizando request: {} con status {}", request.getRequestURI(), response.getStatus());
         MDC.clear();
     }
@@ -51,7 +51,7 @@ public class LoggingInterceptor implements HandlerInterceptor, AsyncHandlerInter
     public void afterConcurrentHandlingStarted(@NonNull HttpServletRequest request,
                                                @NonNull HttpServletResponse response,
                                                @NonNull Object handler) {
-        // ✅ Para requests asíncronos, limpiar MDC en el hilo original
+        // Para requests asíncronos, limpiar MDC en el hilo original
         MDC.clear();
     }
 }

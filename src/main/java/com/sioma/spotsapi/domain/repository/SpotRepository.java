@@ -12,4 +12,5 @@ public interface SpotRepository {
     Optional<Spot> findById(Long id);
     PageResult<Spot> findByLoteId(Long loteId, PaginationParams params);
     boolean existsByLoteIdAndLineaAndPosicion(Long loteId, int linea, int posicion);
+    boolean existsByLoteIdAndApproximateCoordinates(Long loteId, double longitude, double latitude);
 }

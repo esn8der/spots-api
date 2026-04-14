@@ -3,7 +3,6 @@ package com.sioma.spotsapi.web.exception;
 import com.sioma.spotsapi.infrastructure.geospatial.exception.InvalidGeoSpatialException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import com.sioma.spotsapi.domain.exception.*;

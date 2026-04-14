@@ -62,4 +62,9 @@ public class SpotRepositoryImpl implements SpotRepository {
     public boolean existsByLoteIdAndLineaAndPosicion(Long loteId, int linea, int posicion) {
         return jpaRepository.existsByLoteIdAndLineaAndPosicion(loteId, linea, posicion);
     }
+
+    @Override
+    public boolean existsByLoteIdAndApproximateCoordinates(Long loteId, double lon, double lat) {
+        return jpaRepository.existsByLoteIdAndApproximateCoordinates(loteId, lon, lat);
+    }
 }

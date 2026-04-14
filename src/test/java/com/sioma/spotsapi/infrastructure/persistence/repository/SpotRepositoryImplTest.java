@@ -344,4 +344,143 @@ class SpotRepositoryImplTest {
             assertFalse(exists, "Debe retornar false para lote inexistente");
         }
     }
+
+    @Nested
+    @DisplayName("existsByLoteIdAndApproximateCoordinates() - Unicidad geo-espacial")
+    class ExistsByLoteIdAndApproximateCoordinates {
+
+        @Test
+        @DisplayName("devuelve true cuando existe un spot en coordenadas que redondean igual (6 decimales)")
+        void shouldReturnTrueWhenSpotExistsAtApproximateCoordinates() {
+            // GIVEN: Guardamos un spot con coordenadas exactas
+            TestData data = createBaseData();
+            Point point = SpotFixtures.validPoint(); // [-73.647243, 3.896533]
+            LoteEntity lote = createLoteForSpotTest(data, point);
+
+            jpaRepository.save(new SpotEntity(point, lote.getId(), SpotFixtures.LINEA, SpotFixtures.POSICION));
+
+            // WHEN: Consultamos con coordenadas que difieren en el 7.º decimal (~5 cm)
+            // ROUND(-73.6472434, 6) = -73.647243 → MISMA CELDA
+            boolean exists = repository.existsByLoteIdAndApproximateCoordinates(
+                    lote.getId(),
+                    -73.6472434,  // Difiere en 7° decimal
+                    3.8965334
+            );
+
+            // THEN: Debe encontrar el spot porque redondea a la misma celda de ~11 cm
+            assertTrue(exists, "Debe encontrar spot en coordenadas que redondean igual a 6 decimales");
+        }
+
+        @Test
+        @DisplayName("devuelve false cuando las coordenadas redondean a valores distintos")
+        void shouldReturnFalseWhenCoordinatesRoundToDifferentValues() {
+            // GIVEN: Guardamos un spot con coordenadas base
+            TestData data = createBaseData();
+            Point point = SpotFixtures.validPoint(); // [-73.647243, 3.896533]
+            LoteEntity lote = createLoteForSpotTest(data, point);
+
+            jpaRepository.save(new SpotEntity(point, lote.getId(), SpotFixtures.LINEA, SpotFixtures.POSICION));
+
+            // WHEN: Consultamos con coordenadas que difieren en el 6.º decimal (~11 cm)
+            // ROUND(-73.647244, 6) = -73.647244 → CELDA DIFERENTE
+            boolean exists = repository.existsByLoteIdAndApproximateCoordinates(
+                    lote.getId(),
+                    -73.647244,  // Difiere en 6° decimal
+                    3.896533
+            );
+
+            // THEN: No debe encontrar el spot porque cae en celda distinta
+            assertFalse(exists, "No debe encontrar spot en coordenadas que redondean distinto");
+        }
+
+        @Test
+        @DisplayName("devuelve false cuando el lote es diferente aunque las coordenadas coincidan")
+        void shouldReturnFalseWhenLoteIsDifferentEvenWithSameCoordinates() {
+            // GIVEN: Dos lotes diferentes con spots en la misma coordenada aproximada
+            TestData data1 = createBaseData();
+            Point point = SpotFixtures.validPoint();
+            LoteEntity lote1 = createLoteForSpotTest(data1, point);
+
+            jpaRepository.save(new SpotEntity(point, lote1.getId(), 1, 1));
+
+            // Crear segundo lote con datos únicos
+            UsuarioEntity usuario2 = usuarioRepository.save(
+                    new UsuarioEntity(UsuarioFixtures.NOMBRE, UsuarioFixtures.uniqueEmail(), UsuarioFixtures.PASSWORD)
+            );
+            FincaEntity finca2 = fincaRepository.save(
+                    new FincaEntity(FincaFixtures.uniqueName(), usuario2.getId())
+            );
+            PlantaEntity planta2 = plantaRepository.save(
+                    new PlantaEntity(PlantaFixtures.uniqueName())
+            );
+            TestData data2 = new TestData(usuario2.getId(), finca2.getId(), planta2.getId());
+            LoteEntity lote2 = createLoteForSpotTest(data2, point);
+
+            // WHEN: Consultamos en lote2 con las mismas coordenadas del spot en lote1
+            boolean exists = repository.existsByLoteIdAndApproximateCoordinates(
+                    lote2.getId(),  // Lote diferente
+                    point.getX(),
+                    point.getY()
+            );
+
+            // THEN: No debe encontrar porque la unicidad es por (lote_id, coordenadas)
+            assertFalse(exists, "No debe encontrar spot en lote diferente aunque coordenadas coincidan");
+        }
+
+        @Test
+        @DisplayName("devuelve false cuando no hay spots en el lote")
+        void shouldReturnFalseWhenNoSpotsInLote() {
+            // GIVEN: Lote vacío
+            TestData data = createBaseData();
+            Point point = SpotFixtures.validPoint();
+            LoteEntity lote = createLoteForSpotTest(data, point);
+
+            // WHEN: Consultamos coordenadas en lote sin spots
+            boolean exists = repository.existsByLoteIdAndApproximateCoordinates(
+                    lote.getId(),
+                    point.getX(),
+                    point.getY()
+            );
+
+            // THEN
+            assertFalse(exists, "Debe retornar false cuando el lote no tiene spots");
+        }
+
+        @Test
+        @DisplayName("devuelve false cuando el lote no existe")
+        void shouldReturnFalseWhenLoteDoesNotExist() {
+            // WHEN: Consultamos con ID de lote inexistente
+            boolean exists = repository.existsByLoteIdAndApproximateCoordinates(
+                    99999L,
+                    -73.647243,
+                    3.896533
+            );
+
+            // THEN
+            assertFalse(exists, "Debe retornar false para lote inexistente");
+        }
+
+        @Test
+        @DisplayName("maneja correctamente valores negativos de coordenadas")
+        void shouldHandleNegativeCoordinatesCorrectly() {
+            // GIVEN: Spot en coordenadas negativas (hemisferio sur/oeste)
+            TestData data = createBaseData();
+            Point point = new org.locationtech.jts.geom.GeometryFactory(
+                    new org.locationtech.jts.geom.PrecisionModel(), 4326)
+                    .createPoint(new org.locationtech.jts.geom.Coordinate(-74.1234567, -4.5678901));
+            LoteEntity lote = createLoteForSpotTest(data, point);
+
+            jpaRepository.save(new SpotEntity(point, lote.getId(), 1, 1));
+
+            // WHEN: Consultamos con variación en 7° decimal
+            boolean exists = repository.existsByLoteIdAndApproximateCoordinates(
+                    lote.getId(),
+                    -74.1234568,  // Difiere en 7° decimal
+                    -4.5678902
+            );
+
+            // THEN: Debe encontrar porque redondea igual
+            assertTrue(exists, "Debe manejar correctamente coordenadas negativas con redondeo");
+        }
+    }
 }

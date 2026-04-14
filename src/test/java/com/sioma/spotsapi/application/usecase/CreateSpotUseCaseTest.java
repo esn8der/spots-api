@@ -3,6 +3,7 @@ package com.sioma.spotsapi.application.usecase;
 import com.sioma.spotsapi.domain.exception.LoteNotFoundException;
 import com.sioma.spotsapi.domain.exception.PointOutsideLoteException;
 import com.sioma.spotsapi.domain.exception.SpotAlreadyExistsException;
+import com.sioma.spotsapi.domain.exception.SpotAlreadyExistsNearbyException;
 import com.sioma.spotsapi.domain.model.Spot;
 import com.sioma.spotsapi.domain.ports.out.GeospatialConverter;
 import com.sioma.spotsapi.domain.repository.LoteRepository;
@@ -23,6 +24,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,10 +34,8 @@ class CreateSpotUseCaseTest {
 
     @Mock
     private SpotRepository spotRepository;
-
     @Mock
     private LoteRepository loteRepository;
-
     @Mock
     private GeospatialConverter geospatialConverter;
 
@@ -70,13 +71,32 @@ class CreateSpotUseCaseTest {
             // GIVEN: El lote existe, pero ya hay un spot con esa línea/posición
             givenConverterReturnsValidPoint();
             givenLoteExists(true);
-            givenSpotExists(true);
+            givenSpotExistsByPosition(true);
 
             // WHEN + THEN: Debe lanzar excepción y NO guardar nada
             assertThrows(
                     SpotAlreadyExistsException.class,
                     () -> useCase.execute(VALID_COORDINATES, SpotFixtures.LOTE_ID, SpotFixtures.LINEA, SpotFixtures.POSICION),
-                    "Debe lanzar excepción cuando el spot ya existe"
+                    "Debe lanzar excepción cuando el spot ya existe por posición"
+            );
+
+            verify(spotRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("lanza SpotAlreadyExistsNearbyException cuando ya existe un spot en coordenadas aproximadas")
+        void shouldThrowSpotAlreadyExistsNearbyExceptionWhenSpotExistsAtApproximateCoordinates() {
+            // GIVEN: El lote existe, no hay conflicto por posición, pero sí por coordenada aproximada
+            givenConverterReturnsValidPoint();
+            givenLoteExists(true);
+            givenSpotExistsByPosition(false);
+            givenSpotExistsNearby(true);
+
+            // WHEN + THEN: Debe lanzar excepción y NO guardar nada
+            assertThrows(
+                    SpotAlreadyExistsNearbyException.class,
+                    () -> useCase.execute(VALID_COORDINATES, SpotFixtures.LOTE_ID, SpotFixtures.LINEA, SpotFixtures.POSICION),
+                    "Debe lanzar excepción cuando ya existe un spot en coordenadas aproximadas"
             );
 
             verify(spotRepository, never()).save(any());
@@ -88,7 +108,8 @@ class CreateSpotUseCaseTest {
             // GIVEN: El lote existe, pero la coordenada está fuera de su geocerca
             givenConverterReturnsValidPoint();
             givenLoteWithPointOutside();
-            givenSpotExists(false);
+            givenSpotExistsByPosition(false);
+            givenSpotExistsNearby(false);
 
             // WHEN + THEN: Debe lanzar excepción y NO guardar nada
             assertThrows(
@@ -111,7 +132,8 @@ class CreateSpotUseCaseTest {
             // GIVEN: Todas las precondiciones se cumplen
             givenConverterReturnsValidPoint();
             givenLoteExists(true);
-            givenSpotExists(false);
+            givenSpotExistsByPosition(false);
+            givenSpotExistsNearby(false);
 
             // WHEN
             useCase.execute(VALID_COORDINATES, SpotFixtures.LOTE_ID, SpotFixtures.LINEA, SpotFixtures.POSICION);
@@ -126,7 +148,8 @@ class CreateSpotUseCaseTest {
             // GIVEN: Todas las precondiciones se cumplen
             givenConverterReturnsValidPoint();
             givenLoteExists(true);
-            givenSpotExists(false);
+            givenSpotExistsByPosition(false);
+            givenSpotExistsNearby(false);
 
             // WHEN: Ejecutamos el caso de uso
             useCase.execute(VALID_COORDINATES, SpotFixtures.LOTE_ID, SpotFixtures.LINEA, SpotFixtures.POSICION);
@@ -164,9 +187,16 @@ class CreateSpotUseCaseTest {
                 .thenReturn(Optional.of(LoteFixtures.loteNOTContainingPoint(SpotFixtures.validPoint())));
     }
 
-    private void givenSpotExists(boolean exists) {
+    private void givenSpotExistsByPosition(boolean exists) {
         when(spotRepository.existsByLoteIdAndLineaAndPosicion(
                 SpotFixtures.LOTE_ID, SpotFixtures.LINEA, SpotFixtures.POSICION))
+                .thenReturn(exists);
+    }
+
+    private void givenSpotExistsNearby(boolean exists) {
+        // Usa anyDouble() para evitar problemas de precisión en mocks
+        when(spotRepository.existsByLoteIdAndApproximateCoordinates(
+                anyLong(), anyDouble(), anyDouble()))
                 .thenReturn(exists);
     }
 }
